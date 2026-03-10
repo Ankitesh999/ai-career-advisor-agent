@@ -39,6 +39,7 @@ class Settings(BaseModel):
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 60
     admin_emails: list[str] = []
+    cors_origins: list[str] = []
 
     @field_validator("database_url")
     @classmethod
@@ -75,6 +76,11 @@ class Settings(BaseModel):
                 email.strip().lower()
                 for email in (_getenv("ADMIN_EMAILS", "") or "").split(",")
                 if email.strip()
+            ],
+            cors_origins=[
+                origin.strip()
+                for origin in (_getenv("CORS_ORIGINS", "") or "").split(",")
+                if origin.strip()
             ],
         )
 
