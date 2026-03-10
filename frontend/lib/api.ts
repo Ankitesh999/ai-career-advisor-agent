@@ -102,6 +102,14 @@ export interface RoleGapRead {
   created_at: string;
 }
 
+export interface PlacementRiskRead {
+  id: number;
+  student_profile_id: number;
+  risk_level: string;
+  reasons: string[];
+  created_at: string;
+}
+
 export type AuthResponse = {
   access_token: string;
   token_type: string;
@@ -196,6 +204,18 @@ export function getRoleGaps(profileId: number): Promise<RoleGapRead> {
 
 export function generateRoleGaps(profileId: number): Promise<RoleGapRead> {
   return request<RoleGapRead>(`/api/v1/role-gaps/${profileId}`, {
+    method: "POST",
+  });
+}
+
+export function getPlacementRisk(profileId: number): Promise<PlacementRiskRead> {
+  return request<PlacementRiskRead>(`/api/v1/placement-risk/${profileId}`);
+}
+
+export function generatePlacementRisk(
+  profileId: number
+): Promise<PlacementRiskRead> {
+  return request<PlacementRiskRead>(`/api/v1/placement-risk/${profileId}`, {
     method: "POST",
   });
 }

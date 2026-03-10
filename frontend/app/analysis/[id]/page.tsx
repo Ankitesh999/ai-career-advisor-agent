@@ -8,12 +8,14 @@ import CareerChat from "@/components/CareerChat";
 import CompanyFitChart from "@/components/CompanyFitChart";
 import EmployabilityChart from "@/components/EmployabilityChart";
 import LearningRoadmap from "@/components/LearningRoadmap";
+import PlacementRiskCard from "@/components/PlacementRiskCard";
 import RoleGapPanel from "@/components/RoleGapPanel";
 import SkillGapList from "@/components/SkillGapList";
 import {
   CareerAnalysisRead,
   CompanyFitRead,
   EmployabilityScoreRead,
+  PlacementRiskRead,
   RoleGapRead,
   generateCompanyFit,
   computeEmployabilityScore,
@@ -23,7 +25,9 @@ import {
   getCompanyFit,
   getEmployabilityScore,
   getRoleGaps,
+  getPlacementRisk,
   generateRoleGaps,
+  generatePlacementRisk,
 } from "@/lib/api";
 
 type AnalysisPageProps = {
@@ -54,6 +58,7 @@ export default function AnalysisPage({ params }: AnalysisPageProps) {
   const [analysis, setAnalysis] = useState<CareerAnalysisRead | null>(null);
   const [companyFit, setCompanyFit] = useState<CompanyFitRead | null>(null);
   const [roleGaps, setRoleGaps] = useState<RoleGapRead | null>(null);
+  const [placementRisk, setPlacementRisk] = useState<PlacementRiskRead | null>(null);
   const [employability, setEmployability] = useState<EmployabilityScoreRead | null>(
     null
   );
@@ -95,6 +100,13 @@ export default function AnalysisPage({ params }: AnalysisPageProps) {
         } catch {
           const gaps = await generateRoleGaps(profileId);
           if (mounted) setRoleGaps(gaps);
+        }
+        try {
+          const risk = await getPlacementRisk(profileId);
+          if (mounted) setPlacementRisk(risk);
+        } catch {
+          const risk = await generatePlacementRisk(profileId);
+          if (mounted) setPlacementRisk(risk);
         }
       } catch (err) {
         if (!mounted) return;
@@ -149,6 +161,8 @@ export default function AnalysisPage({ params }: AnalysisPageProps) {
       setCompanyFit(fit);
       const gaps = await generateRoleGaps(profileId);
       setRoleGaps(gaps);
+      const risk = await generatePlacementRisk(profileId);
+      setPlacementRisk(risk);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to re-run analysis.");
     } finally {
@@ -272,6 +286,12 @@ export default function AnalysisPage({ params }: AnalysisPageProps) {
                     industry_readiness: employability.industry_readiness,
                     resume_quality: employability.resume_quality,
                   }}
+                />
+              ) : null}
+              {placementRisk ? (
+                <PlacementRiskCard
+                  level={placementRisk.risk_level}
+                  reasons={placementRisk.reasons}
                 />
               ) : null}
 
