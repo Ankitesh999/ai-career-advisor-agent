@@ -35,15 +35,34 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 export interface StudentProfileCreate {
   name: string;
   twelfth_percentage: number;
+  cgpa: number;
   degree: string;
   specialization: string;
   current_skills: string[];
   interests: string[];
   target_industry: string;
+  projects: number;
+  internships: number;
+  certifications: number;
 }
 
 export interface StudentProfileRead extends StudentProfileCreate {
   id: number;
+  created_at: string;
+}
+
+export interface ResumeAnalysisRead {
+  id: number;
+  student_profile_id: number;
+  file_name: string;
+  extracted_skills: string[];
+  projects: string[];
+  experience: string[];
+  education: string[];
+  resume_score: number;
+  missing_keywords: string[];
+  weak_sections: string[];
+  suggestions: string[];
   created_at: string;
 }
 
@@ -145,6 +164,38 @@ export function computeEmployabilityScore(
   return request<EmployabilityScoreRead>(`/api/v1/employability/${profileId}`, {
     method: "POST",
   });
+}
+
+export async function uploadResume(
+  profileId: number,
+  file: File
+): Promise<ResumeAnalysisRead> {
+  const token = typeof window !== "undefined" ? localStorage.getItem(TOKEN_KEY) : null;
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const response = await fetch(`${API_BASE}/api/v1/resume/${profileId}`, {
+    method: "POST",
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: formData,
+  });
+
+  if (!response.ok) {
+    let message = "Request failed";
+    try {
+      const data = (await response.json()) as { detail?: string };
+      message = data.detail || message;
+    } catch {}
+    throw new Error(message);
+  }
+
+  return (await response.json()) as ResumeAnalysisRead;
+}
+
+export function getResumeAnalysis(profileId: number): Promise<ResumeAnalysisRead> {
+  return request<ResumeAnalysisRead>(`/api/v1/resume/${profileId}`);
 }
 
 export function formatINR(value: number) {

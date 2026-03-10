@@ -40,6 +40,9 @@ export default function Navbar() {
               <Link href="/dashboard" className="transition hover:text-white">
                 Dashboard
               </Link>
+              <Link href="/resume" className="transition hover:text-white">
+                Resume Scan
+              </Link>
               <Link href="/create-profile" className="transition hover:text-white">
                 Create Profile
               </Link>
