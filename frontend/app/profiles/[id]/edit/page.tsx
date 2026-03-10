@@ -26,11 +26,15 @@ export default function EditProfilePage({ params }: EditProfilePageProps) {
           setInitialValues({
             name: profile.name,
             twelfth_percentage: profile.twelfth_percentage,
+            cgpa: profile.cgpa ?? 0,
             degree: profile.degree,
             specialization: profile.specialization,
-            current_skills: profile.current_skills,
-            interests: profile.interests,
+            current_skills: profile.current_skills ?? [],
+            interests: profile.interests ?? [],
             target_industry: profile.target_industry,
+            projects: profile.projects ?? 0,
+            internships: profile.internships ?? 0,
+            certifications: profile.certifications ?? 0,
           });
         }
       } catch (err) {
