@@ -95,6 +95,13 @@ export interface CompanyFitRead {
   created_at: string;
 }
 
+export interface RoleGapRead {
+  id: number;
+  student_profile_id: number;
+  role_gaps: { role: string; missing_skills: string[]; learning_plan: string[] }[];
+  created_at: string;
+}
+
 export type AuthResponse = {
   access_token: string;
   token_type: string;
@@ -179,6 +186,16 @@ export function getCompanyFit(profileId: number): Promise<CompanyFitRead> {
 
 export function generateCompanyFit(profileId: number): Promise<CompanyFitRead> {
   return request<CompanyFitRead>(`/api/v1/company-fit/${profileId}`, {
+    method: "POST",
+  });
+}
+
+export function getRoleGaps(profileId: number): Promise<RoleGapRead> {
+  return request<RoleGapRead>(`/api/v1/role-gaps/${profileId}`);
+}
+
+export function generateRoleGaps(profileId: number): Promise<RoleGapRead> {
+  return request<RoleGapRead>(`/api/v1/role-gaps/${profileId}`, {
     method: "POST",
   });
 }

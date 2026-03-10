@@ -8,11 +8,13 @@ import CareerChat from "@/components/CareerChat";
 import CompanyFitChart from "@/components/CompanyFitChart";
 import EmployabilityChart from "@/components/EmployabilityChart";
 import LearningRoadmap from "@/components/LearningRoadmap";
+import RoleGapPanel from "@/components/RoleGapPanel";
 import SkillGapList from "@/components/SkillGapList";
 import {
   CareerAnalysisRead,
   CompanyFitRead,
   EmployabilityScoreRead,
+  RoleGapRead,
   generateCompanyFit,
   computeEmployabilityScore,
   formatINR,
@@ -20,6 +22,8 @@ import {
   getAnalysis,
   getCompanyFit,
   getEmployabilityScore,
+  getRoleGaps,
+  generateRoleGaps,
 } from "@/lib/api";
 
 type AnalysisPageProps = {
@@ -49,6 +53,7 @@ export default function AnalysisPage({ params }: AnalysisPageProps) {
   const profileId = Number(id);
   const [analysis, setAnalysis] = useState<CareerAnalysisRead | null>(null);
   const [companyFit, setCompanyFit] = useState<CompanyFitRead | null>(null);
+  const [roleGaps, setRoleGaps] = useState<RoleGapRead | null>(null);
   const [employability, setEmployability] = useState<EmployabilityScoreRead | null>(
     null
   );
@@ -83,6 +88,13 @@ export default function AnalysisPage({ params }: AnalysisPageProps) {
         } catch {
           const fit = await generateCompanyFit(profileId);
           if (mounted) setCompanyFit(fit);
+        }
+        try {
+          const gaps = await getRoleGaps(profileId);
+          if (mounted) setRoleGaps(gaps);
+        } catch {
+          const gaps = await generateRoleGaps(profileId);
+          if (mounted) setRoleGaps(gaps);
         }
       } catch (err) {
         if (!mounted) return;
@@ -135,6 +147,8 @@ export default function AnalysisPage({ params }: AnalysisPageProps) {
       setEmployability(score);
       const fit = await generateCompanyFit(profileId);
       setCompanyFit(fit);
+      const gaps = await generateRoleGaps(profileId);
+      setRoleGaps(gaps);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to re-run analysis.");
     } finally {
@@ -245,6 +259,7 @@ export default function AnalysisPage({ params }: AnalysisPageProps) {
               ) : null}
               <SkillGapList items={analysis.skill_gaps} />
               <LearningRoadmap stages={analysis.learning_roadmap} />
+              {roleGaps ? <RoleGapPanel items={roleGaps.role_gaps} /> : null}
             </div>
 
             <div className="space-y-6">
