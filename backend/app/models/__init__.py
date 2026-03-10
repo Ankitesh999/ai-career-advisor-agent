@@ -2,6 +2,7 @@
 from app.models.career_analysis import CareerAnalysis  # noqa: F401
 from app.models.company_fit import CompanyFit  # noqa: F401
 from app.models.employability_score import EmployabilityScore  # noqa: F401
+from app.models.internship_readiness import InternshipReadiness  # noqa: F401
 from app.models.placement_risk import PlacementRisk  # noqa: F401
 from app.models.resume_analysis import ResumeAnalysis  # noqa: F401
 from app.models.role_gap_analysis import RoleGapAnalysis  # noqa: F401

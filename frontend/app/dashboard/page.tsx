@@ -46,12 +46,26 @@ export default function DashboardPage() {
             Manage and revisit your saved career profiles.
           </p>
         </div>
-        <Link
-          href="/create-profile"
-          className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-slate-900 transition hover:bg-slate-200"
-        >
-          Create New Profile
-        </Link>
+        <div className="flex flex-wrap gap-3">
+          <Link
+            href="/internship"
+            className="rounded-full border border-white/20 px-4 py-2 text-sm font-semibold text-white transition hover:border-white/40"
+          >
+            Internship Readiness
+          </Link>
+          <Link
+            href="/training"
+            className="rounded-full border border-white/20 px-4 py-2 text-sm font-semibold text-white transition hover:border-white/40"
+          >
+            View Training Recommendations
+          </Link>
+          <Link
+            href="/create-profile"
+            className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-slate-900 transition hover:bg-slate-200"
+          >
+            Create New Profile
+          </Link>
+        </div>
       </header>
 
       {loading ? (

@@ -131,6 +131,26 @@ export interface AdminStudentRead {
   placement_risk: string | null;
 }
 
+export interface TrainingRecommendationsRead {
+  total_students: number;
+  weak_skills: { skill: string; count: number }[];
+  programs: { title: string; focus_skills: string[]; description: string }[];
+}
+
+export interface InternshipReadinessRead {
+  id: number;
+  student_profile_id: number;
+  readiness_score: number;
+  readiness_level: string;
+  action_plan: string[];
+  created_at: string;
+}
+
+export interface IndustryDemandRead {
+  year: number;
+  trends: { trend: string; impact: string }[];
+}
+
 export type AuthResponse = {
   access_token: string;
   token_type: string;
@@ -271,6 +291,28 @@ export function getAdminMetrics(): Promise<AdminMetricsRead> {
 
 export function listAdminStudents(): Promise<AdminStudentRead[]> {
   return request<AdminStudentRead[]>("/api/v1/admin/students");
+}
+
+export function getTrainingRecommendations(): Promise<TrainingRecommendationsRead> {
+  return request<TrainingRecommendationsRead>("/api/v1/training/recommendations");
+}
+
+export function getInternshipReadiness(
+  profileId: number
+): Promise<InternshipReadinessRead> {
+  return request<InternshipReadinessRead>(`/api/v1/internship-readiness/${profileId}`);
+}
+
+export function generateInternshipReadiness(
+  profileId: number
+): Promise<InternshipReadinessRead> {
+  return request<InternshipReadinessRead>(`/api/v1/internship-readiness/${profileId}`, {
+    method: "POST",
+  });
+}
+
+export function getIndustryDemand(): Promise<IndustryDemandRead> {
+  return request<IndustryDemandRead>("/api/v1/industry-demand");
 }
 
 export async function uploadResume(

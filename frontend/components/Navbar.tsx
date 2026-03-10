@@ -43,6 +43,12 @@ export default function Navbar() {
               <Link href="/dashboard" className="transition hover:text-white">
                 Dashboard
               </Link>
+              <Link href="/training" className="transition hover:text-white">
+                Training
+              </Link>
+              <Link href="/internship" className="transition hover:text-white">
+                Internship Readiness
+              </Link>
               {isAdmin ? (
                 <Link href="/admin/dashboard" className="transition hover:text-white">
                   Admin Dashboard
