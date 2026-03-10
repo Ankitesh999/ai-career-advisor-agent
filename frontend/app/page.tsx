@@ -2,36 +2,54 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Brain, Compass, Sparkles } from "lucide-react";
+import { Brain, Compass, FileText, Shield, Sparkles, Target } from "lucide-react";
 import { useEffect, useState } from "react";
 import { clearStoredProfileId, getStoredProfileId } from "@/lib/profile";
+import { getAuthRole } from "@/lib/api";
 
 const features = [
   {
-    title: "Create Profile",
-    description: "Enter academic background, skills, and interests in minutes.",
+    title: "Student Profile Intake",
+    description: "Capture academics, skills, projects, and internships in one flow.",
     icon: Brain,
   },
   {
     title: "AI Career Analysis",
-    description: "AI analyzes your profile and ranks the best career paths.",
+    description: "Career fit, skill gaps, and personalized learning roadmap.",
     icon: Sparkles,
   },
   {
-    title: "Skill Roadmap",
-    description: "Get a step-by-step learning plan tailored to your goals.",
+    title: "Employability & Risk",
+    description: "Placement readiness score and risk predictors for guidance.",
+    icon: Shield,
+  },
+  {
+    title: "Resume AI Scanner",
+    description: "Extract skills, detect missing keywords, and improve resumes.",
+    icon: FileText,
+  },
+  {
+    title: "Company Fit Predictor",
+    description: "Match students to companies based on skills and profile strength.",
+    icon: Target,
+  },
+  {
+    title: "Training & Demand",
+    description: "Cohort training priorities and industry demand trends for 2026.",
     icon: Compass,
   },
 ];
 
 export default function HomePage() {
   const [savedProfileId, setSavedProfileId] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     const stored = getStoredProfileId();
     if (stored) {
       setSavedProfileId(stored);
     }
+    setIsAdmin(getAuthRole() === "admin");
   }, []);
 
   return (
@@ -45,14 +63,14 @@ export default function HomePage() {
         >
           <div className="space-y-6">
             <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-slate-200">
-              AI Career Intelligence
+              AI Career & Placement Intelligence
             </div>
             <h1 className="text-5xl font-bold tracking-tight text-white sm:text-6xl">
-              AI Career Intelligence Agent
+              AI Career & Placement Intelligence Agent
             </h1>
             <p className="text-lg text-slate-300">
-              Get AI-powered career insights, skill gap analysis, and a personalized learning
-              roadmap tailored to your goals.
+              A full-stack placement intelligence suite: career analysis, employability
+              scoring, resume scanning, company fit, and training recommendations.
             </p>
             <div className="flex flex-wrap items-center gap-4">
               {savedProfileId ? (
@@ -63,6 +81,14 @@ export default function HomePage() {
                   >
                     Continue Career Analysis
                   </Link>
+                  {isAdmin ? (
+                    <Link
+                      href="/admin/dashboard"
+                      className="rounded-full border border-white/20 px-6 py-3 text-sm font-semibold text-white transition hover:border-white/40"
+                    >
+                      Placement Cell Dashboard
+                    </Link>
+                  ) : null}
                   <button
                     type="button"
                     onClick={() => {
@@ -82,6 +108,14 @@ export default function HomePage() {
                   >
                     Create Profile
                   </Link>
+                  {isAdmin ? (
+                    <Link
+                      href="/admin/dashboard"
+                      className="rounded-full border border-white/20 px-6 py-3 text-sm font-semibold text-white transition hover:border-white/40"
+                    >
+                      Placement Cell Dashboard
+                    </Link>
+                  ) : null}
                   <Link
                     href="/analysis/1"
                     className="rounded-full border border-white/20 px-6 py-3 text-sm font-semibold text-white transition hover:border-white/40"
@@ -97,12 +131,12 @@ export default function HomePage() {
                 <p>Role fit accuracy</p>
               </div>
               <div>
-                <p className="text-2xl font-semibold text-white">5+</p>
-                <p>Insight categories</p>
+                <p className="text-2xl font-semibold text-white">10+</p>
+                <p>Intelligence modules</p>
               </div>
               <div>
-                <p className="text-2xl font-semibold text-white">24h</p>
-                <p>Updated trends</p>
+                <p className="text-2xl font-semibold text-white">Cohort</p>
+                <p>Training insights</p>
               </div>
             </div>
           </div>
@@ -117,16 +151,16 @@ export default function HomePage() {
                   <p className="mt-2 text-3xl font-semibold text-white">AI Engineer</p>
                   <p className="text-sm text-slate-300">Fit Score: 82</p>
                 </div>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                    <p className="text-xs text-slate-400">Top Skill Gap</p>
-                    <p className="mt-2 text-lg font-semibold text-white">MLOps</p>
-                  </div>
-                  <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                    <p className="text-xs text-slate-400">Next Milestone</p>
-                    <p className="mt-2 text-lg font-semibold text-white">Portfolio Project</p>
-                  </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                  <p className="text-xs text-slate-400">Employability Score</p>
+                  <p className="mt-2 text-lg font-semibold text-white">78 / 100</p>
                 </div>
+                <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                  <p className="text-xs text-slate-400">Placement Risk</p>
+                  <p className="mt-2 text-lg font-semibold text-white">Medium</p>
+                </div>
+              </div>
                 <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
                   <p className="text-xs text-slate-400">Projected Entry Salary</p>
                   <p className="mt-2 text-2xl font-semibold text-white">₹6L – ₹12L</p>
