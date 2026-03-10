@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 import logging
 
 from google import genai
@@ -72,10 +73,7 @@ class LLMClient:
         if not output_text:
             raise ValueError("LLM returned empty output.")
 
-        try:
-            data = json.loads(output_text)
-        except json.JSONDecodeError as exc:
-            raise ValueError("LLM returned invalid JSON.") from exc
+        data = self._parse_json(output_text)
 
         required_keys = {
             "career_recommendations",
@@ -144,8 +142,7 @@ class LLMClient:
         if not output_text:
             raise ValueError("LLM returned empty response.")
 
-        data = json.loads(output_text)
-        return data
+        return self._parse_json(output_text)
 
     def generate_company_fit_adjustments(
         self,
@@ -168,7 +165,20 @@ class LLMClient:
         output_text = getattr(response, "text", None)
         if not output_text:
             raise ValueError("LLM returned empty response.")
-        data = json.loads(output_text)
+        data = self._parse_json(output_text)
         if not isinstance(data, dict):
             raise ValueError("LLM response must be a JSON object.")
         return data
+
+    def _parse_json(self, output_text: str) -> dict:
+        cleaned = output_text.strip()
+        if cleaned.startswith("```"):
+            cleaned = re.sub(r"^```[a-zA-Z]*", "", cleaned).strip()
+            cleaned = cleaned.rstrip("`").strip()
+        try:
+            return json.loads(cleaned)
+        except json.JSONDecodeError:
+            match = re.search(r"\{.*\}", cleaned, re.DOTALL)
+            if match:
+                return json.loads(match.group(0))
+            raise ValueError("LLM returned invalid JSON.")

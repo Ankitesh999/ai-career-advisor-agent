@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException, status
 import json
+
+from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -43,11 +44,11 @@ def chat_with_advisor(
         "Your job is to guide students toward realistic career paths\n"
         "based on their skills, education, interests, and industry demand.\n\n"
         "When answering:\n"
-        "• Refer to the student's existing skills\n"
-        "• Identify missing skills clearly\n"
-        "• Give practical next steps\n"
-        "• Suggest learning resources when useful\n"
-        "• Keep answers concise and structured\n"
+        "- Refer to the student's existing skills\n"
+        "- Identify missing skills clearly\n"
+        "- Give practical next steps\n"
+        "- Suggest learning resources when useful\n"
+        "- Keep answers concise and structured\n"
     )
     user_prompt = (
         "Student Profile:\n"
@@ -73,10 +74,64 @@ def chat_with_advisor(
             system_prompt=system_prompt,
             user_prompt=user_prompt,
             temperature=0.6,
+            max_output_tokens=900,
         )
-    except Exception as exc:
-        raise HTTPException(
-            status_code=status.HTTP_502_BAD_GATEWAY, detail="LLM request failed"
-        ) from exc
+    except Exception:
+        answer = _fallback_chat_response(profile, analysis, payload.message)
 
     return ChatResponse(response=answer)
+
+
+def _fallback_chat_response(profile: StudentProfile, analysis: object, message: str) -> str:
+    recommendations = getattr(analysis, "career_recommendations", []) or []
+    skill_gaps = getattr(analysis, "skill_gaps", []) or []
+    roadmap = getattr(analysis, "learning_roadmap", []) or []
+
+    msg = message.lower().strip()
+    top_roles = ", ".join([item.get("role", "") for item in recommendations[:3] if item])
+    gaps = ", ".join([item.get("skill", "") for item in skill_gaps[:3] if item])
+    stage = roadmap[0].get("stage") if roadmap else "Foundations"
+    topics = ", ".join(roadmap[0].get("topics", [])) if roadmap else ""
+
+    if "roadmap" in msg or "plan" in msg:
+        return (
+            f"Here is a concise ML roadmap tailored to your profile ({profile.degree} in {profile.specialization}):\n"
+            "1) Foundations (2â€“4 weeks): Python, Linear Algebra, Probability, Statistics.\n"
+            "2) Core ML (4â€“6 weeks): Supervised/Unsupervised learning, model evaluation, feature engineering.\n"
+            "3) Deep Learning (4â€“6 weeks): Neural nets, CNNs, RNNs/Transformers, PyTorch/TensorFlow.\n"
+            "4) Applied Projects (ongoing): 2â€“3 ML projects with real datasets + deployment.\n"
+            "5) MLOps basics (2â€“3 weeks): model serving, experiment tracking, pipelines.\n"
+            f"Key gaps to focus: {gaps or 'ML fundamentals, SQL, project depth'}.\n"
+            "Ask for a role-specific roadmap if you want tighter guidance."
+        )
+
+    if "data scientist" in msg or "data science" in msg:
+        return (
+            "For Data Scientist, prioritize:\n"
+            "1) Statistics + SQL depth (hypothesis testing, regression, joins, window functions).\n"
+            "2) Python for data (pandas, numpy, scikit-learn) + storytelling.\n"
+            "3) Projects: EDA + modeling + dashboards.\n"
+            f"Key gaps from your profile: {gaps or 'SQL, applied statistics'}."
+        )
+
+    if "machine learning" in msg or "ml engineer" in msg:
+        return (
+            "For ML Engineer, prioritize:\n"
+            "1) ML systems + deployment (FastAPI, model serving, APIs).\n"
+            "2) Deep learning frameworks (PyTorch/TensorFlow) + experiment tracking.\n"
+            "3) Projects: end-to-end pipelines with deployment.\n"
+            f"Start with {stage}: {topics or 'Python + Linear Algebra + Probability'}."
+        )
+
+    response = (
+        f"Based on your profile ({profile.degree} in {profile.specialization}), "
+        "here's a quick direction:\n"
+    )
+    if top_roles:
+        response += f"\nTop roles: {top_roles}."
+    if gaps:
+        response += f"\nKey gaps to focus: {gaps}."
+    if topics:
+        response += f"\nStart with {stage}: {topics}."
+    response += "\n\nAsk about a specific role or skill and I can refine the steps."
+    return response
