@@ -37,6 +37,7 @@ export default function AnalysisPage({ params }: AnalysisPageProps) {
   const [analysis, setAnalysis] = useState<CareerAnalysisRead | null>(null);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
+  const [rerunning, setRerunning] = useState(false);
   const [missing, setMissing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -92,6 +93,20 @@ export default function AnalysisPage({ params }: AnalysisPageProps) {
     }
   }
 
+  async function handleRerun() {
+    setRerunning(true);
+    setError(null);
+    try {
+      const data = await generateAnalysis(profileId);
+      setAnalysis(data);
+      setMissing(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to re-run analysis.");
+    } finally {
+      setRerunning(false);
+    }
+  }
+
   return (
     <main className="mx-auto max-w-6xl space-y-6 px-6 py-10">
       <header className="space-y-2">
@@ -99,6 +114,15 @@ export default function AnalysisPage({ params }: AnalysisPageProps) {
         <p className="text-sm text-slate-600">
           AI-generated insights tailored to this student profile.
         </p>
+        {!loading && analysis ? (
+          <button
+            onClick={handleRerun}
+            disabled={rerunning}
+            className="inline-flex items-center rounded-md border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:text-slate-900 disabled:opacity-70"
+          >
+            {rerunning ? "Re-running..." : "Re-run AI Analysis"}
+          </button>
+        ) : null}
       </header>
 
       {loading ? <p className="text-sm text-slate-500">Loading analysis...</p> : null}

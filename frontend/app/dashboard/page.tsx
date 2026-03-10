@@ -97,6 +97,12 @@ export default function DashboardPage() {
               >
                 Open Analysis
               </Link>
+              <Link
+                href={`/profiles/${profile.id}/edit`}
+                className="ml-2 mt-4 inline-flex rounded-md border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:text-slate-900"
+              >
+                Edit
+              </Link>
             </div>
           ))}
         </div>

@@ -38,3 +38,22 @@ class StudentProfileService:
             StudentProfile.id
         )
         return list(self.db.scalars(stmt))
+
+    def update_profile(
+        self, profile_id: int, user_id: int, payload: StudentProfileCreate
+    ) -> StudentProfile | None:
+        profile = self.db.get(StudentProfile, profile_id)
+        if profile is None or profile.user_id != user_id:
+            return None
+
+        profile.name = payload.name
+        profile.twelfth_percentage = payload.twelfth_percentage
+        profile.degree = payload.degree
+        profile.specialization = payload.specialization
+        profile.current_skills = payload.current_skills
+        profile.interests = payload.interests
+        profile.target_industry = payload.target_industry
+
+        self.db.commit()
+        self.db.refresh(profile)
+        return profile

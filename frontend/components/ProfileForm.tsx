@@ -8,6 +8,9 @@ import { setStoredProfileId } from "@/lib/profile";
 
 type ProfileFormProps = {
   onCreated?: (profile: StudentProfileRead) => void;
+  initialValues?: Partial<StudentProfileCreate>;
+  onSubmitOverride?: (payload: StudentProfileCreate) => Promise<StudentProfileRead>;
+  submitLabel?: string;
 };
 
 const parseCommaList = (value: string): string[] =>
@@ -19,13 +22,16 @@ const parseCommaList = (value: string): string[] =>
 export default function ProfileForm({ onCreated }: ProfileFormProps) {
   const router = useRouter();
   const [form, setForm] = useState({
-    name: "",
-    twelfth_percentage: "",
-    degree: "",
-    specialization: "",
-    current_skills: "",
-    interests: "",
-    target_industry: "",
+    name: initialValues?.name ?? "",
+    twelfth_percentage:
+      initialValues?.twelfth_percentage !== undefined
+        ? String(initialValues.twelfth_percentage)
+        : "",
+    degree: initialValues?.degree ?? "",
+    specialization: initialValues?.specialization ?? "",
+    current_skills: initialValues?.current_skills?.join(", ") ?? "",
+    interests: initialValues?.interests?.join(", ") ?? "",
+    target_industry: initialValues?.target_industry ?? "",
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -58,7 +64,9 @@ export default function ProfileForm({ onCreated }: ProfileFormProps) {
 
     try {
       setLoading(true);
-      const result = await createProfile(payload);
+      const result = onSubmitOverride
+        ? await onSubmitOverride(payload)
+        : await createProfile(payload);
       setStoredProfileId(result.id);
       router.push(`/analysis/${result.id}`);
       onCreated?.(result);
@@ -152,7 +160,7 @@ export default function ProfileForm({ onCreated }: ProfileFormProps) {
         disabled={loading}
         className="inline-flex items-center justify-center rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-70"
       >
-        {loading ? "Creating..." : "Create Profile"}
+        {loading ? "Saving..." : submitLabel ?? "Create Profile"}
       </button>
 
       {error ? <p className="text-sm text-red-600">{error}</p> : null}

@@ -98,6 +98,16 @@ export function getProfile(id: number): Promise<StudentProfileRead> {
   return request<StudentProfileRead>(`/api/v1/profiles/${id}`);
 }
 
+export function updateProfile(
+  id: number,
+  payload: StudentProfileCreate
+): Promise<StudentProfileRead> {
+  return request<StudentProfileRead>(`/api/v1/profiles/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+}
+
 export function listProfiles(): Promise<StudentProfileRead[]> {
   return request<StudentProfileRead[]>("/api/v1/profiles");
 }
