@@ -27,6 +27,11 @@ class TokenResponse(BaseModel):
 
 @router.post("/register", status_code=status.HTTP_201_CREATED)
 def register(payload: RegisterRequest, db: Session = Depends(get_db)) -> dict:
+    if len(payload.password.encode("utf-8")) > 72:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Password too long (max 72 bytes).",
+        )
     user = User(email=str(payload.email), password_hash=hash_password(payload.password))
     db.add(user)
     try:
@@ -40,6 +45,11 @@ def register(payload: RegisterRequest, db: Session = Depends(get_db)) -> dict:
 
 @router.post("/login", response_model=TokenResponse)
 def login(payload: LoginRequest, db: Session = Depends(get_db)) -> TokenResponse:
+    if len(payload.password.encode("utf-8")) > 72:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Password too long (max 72 bytes).",
+        )
     user = db.query(User).filter(User.email == str(payload.email)).first()
     if user is None or not verify_password(payload.password, user.password_hash):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")

@@ -33,7 +33,8 @@ class Settings(BaseModel):
     db_max_overflow: int = 10
 
     auto_create_tables: bool = False
-    openai_api_key: str | None = None
+    gemini_api_key: str | None = None
+    gemini_model: str = "gemini-2.5-flash"
     jwt_secret: str = "change-me"
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 60
@@ -62,7 +63,8 @@ class Settings(BaseModel):
             db_pool_size=int(_getenv("DB_POOL_SIZE", "5") or "5"),
             db_max_overflow=int(_getenv("DB_MAX_OVERFLOW", "10") or "10"),
             auto_create_tables=_parse_bool(_getenv("AUTO_CREATE_TABLES"), default=False),
-            openai_api_key=_getenv("OPENAI_API_KEY"),
+            gemini_api_key=_getenv("GEMINI_API_KEY"),
+            gemini_model=_getenv("GEMINI_MODEL", "gemini-2.5-flash") or "gemini-2.5-flash",
             jwt_secret=_getenv("JWT_SECRET", "change-me") or "change-me",
             jwt_algorithm=_getenv("JWT_ALGORITHM", "HS256") or "HS256",
             access_token_expire_minutes=int(

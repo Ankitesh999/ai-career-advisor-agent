@@ -19,7 +19,12 @@ const parseCommaList = (value: string): string[] =>
     .map((item) => item.trim())
     .filter(Boolean);
 
-export default function ProfileForm({ onCreated }: ProfileFormProps) {
+export default function ProfileForm({
+  onCreated,
+  initialValues,
+  onSubmitOverride,
+  submitLabel,
+}: ProfileFormProps) {
   const router = useRouter();
   const [form, setForm] = useState({
     name: initialValues?.name ?? "",

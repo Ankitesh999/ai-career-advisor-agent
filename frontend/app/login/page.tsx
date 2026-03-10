@@ -66,6 +66,12 @@ export default function LoginPage() {
         </button>
         {error ? <p className="text-sm text-red-600">{error}</p> : null}
       </form>
+      <p className="mt-4 text-center text-sm text-slate-600">
+        Don&apos;t have an account?{" "}
+        <a className="font-semibold text-slate-900 hover:underline" href="/signup">
+          Sign up
+        </a>
+      </p>
     </main>
   );
 }

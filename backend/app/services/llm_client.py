@@ -3,11 +3,11 @@ from __future__ import annotations
 import json
 import logging
 
-from openai import OpenAI
+from google import genai
+from google.genai import types
 
 from app.core.config import get_settings
 from app.models.student_profile import StudentProfile
-
 
 logger = logging.getLogger(__name__)
 
@@ -15,15 +15,20 @@ logger = logging.getLogger(__name__)
 class LLMClient:
     def __init__(self) -> None:
         settings = get_settings()
-        if not settings.openai_api_key:
+        if not settings.gemini_api_key:
             self.client = None
+            self.model = settings.gemini_model
             return
-        self.client = OpenAI(api_key=settings.openai_api_key)
+        self.client = genai.Client(api_key=settings.gemini_api_key)
+        self.model = settings.gemini_model
 
-    def generate_career_analysis(self, profile: StudentProfile) -> dict:
+    def _require_client(self) -> genai.Client:
         if self.client is None:
             raise RuntimeError("LLM disabled")
+        return self.client
 
+    def generate_career_analysis(self, profile: StudentProfile) -> dict:
+        client = self._require_client()
         system_prompt = (
             "You are an expert career advisor and labor market analyst. "
             "Analyze the student's profile and produce structured career insights. "
@@ -52,24 +57,18 @@ class LLMClient:
             "}\n"
         )
 
-        response = self.client.responses.create(
-            model="gpt-4o-mini",
-            input=[
-                {
-                    "role": "system",
-                    "content": [{"type": "input_text", "text": system_prompt}],
-                },
-                {
-                    "role": "user",
-                    "content": [{"type": "input_text", "text": user_prompt}],
-                },
-            ],
-            text={"format": {"type": "json_object"}},
-            temperature=0.7,
-            timeout=20,
+        response = client.models.generate_content(
+            model=self.model,
+            contents=user_prompt,
+            config=types.GenerateContentConfig(
+                system_instruction=system_prompt,
+                response_mime_type="application/json",
+                temperature=0.7,
+                max_output_tokens=400,
+            ),
         )
 
-        output_text = response.output_text
+        output_text = getattr(response, "text", None)
         if not output_text:
             raise ValueError("LLM returned empty output.")
 
@@ -100,3 +99,25 @@ class LLMClient:
             raise ValueError("Invalid industry_trends format.")
 
         return data
+
+    def generate_chat_response(
+        self,
+        system_prompt: str,
+        user_prompt: str,
+        temperature: float = 0.6,
+        max_output_tokens: int = 400,
+    ) -> str:
+        client = self._require_client()
+        response = client.models.generate_content(
+            model=self.model,
+            contents=user_prompt,
+            config=types.GenerateContentConfig(
+                system_instruction=system_prompt,
+                temperature=temperature,
+                max_output_tokens=max_output_tokens,
+            ),
+        )
+        output_text = getattr(response, "text", None)
+        if not output_text:
+            raise ValueError("LLM returned empty response.")
+        return output_text

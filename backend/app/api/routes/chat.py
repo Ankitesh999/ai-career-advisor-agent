@@ -69,24 +69,15 @@ def chat_with_advisor(
 
     llm = LLMClient()
     try:
-        response = llm.client.responses.create(
-            model="gpt-4o-mini",
-            input=[
-                {"role": "system", "content": [{"type": "input_text", "text": system_prompt}]},
-                {"role": "user", "content": [{"type": "input_text", "text": user_prompt}]},
-            ],
-            max_output_tokens=400,
+        answer = llm.generate_chat_response(
+            system_prompt=system_prompt,
+            user_prompt=user_prompt,
             temperature=0.6,
+            max_output_tokens=400,
         )
     except Exception as exc:
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY, detail="LLM request failed"
         ) from exc
-
-    answer = response.output_text or ""
-    if not answer:
-        raise HTTPException(
-            status_code=status.HTTP_502_BAD_GATEWAY, detail="LLM returned empty response"
-        )
 
     return ChatResponse(response=answer)
