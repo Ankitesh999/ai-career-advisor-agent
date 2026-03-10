@@ -15,6 +15,7 @@ export default function Navbar() {
 
   const handleLogout = () => {
     clearAuthToken();
+    clearStoredProfileId();
     router.push("/login");
   };
 
@@ -27,6 +28,9 @@ export default function Navbar() {
         <nav className="flex items-center gap-6 text-sm font-medium text-slate-600">
           <Link href="/" className="transition hover:text-slate-900">
             Home
+          </Link>
+          <Link href="/dashboard" className="transition hover:text-slate-900">
+            Dashboard
           </Link>
           <Link href="/create-profile" className="transition hover:text-slate-900">
             Create Profile

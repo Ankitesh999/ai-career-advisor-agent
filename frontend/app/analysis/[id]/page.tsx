@@ -4,6 +4,7 @@ import { use, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 
 import CareerChart from "@/components/CareerChart";
+import CareerChat from "@/components/CareerChat";
 import LearningRoadmap from "@/components/LearningRoadmap";
 import SkillGapList from "@/components/SkillGapList";
 import { CareerAnalysisRead, formatINR, generateAnalysis, getAnalysis } from "@/lib/api";
@@ -136,15 +137,16 @@ export default function AnalysisPage({ params }: AnalysisPageProps) {
           transition={{ duration: 0.5 }}
           className="space-y-6"
         >
-          <CareerChart data={analysis.career_recommendations} />
-
-          <div className="grid gap-6 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             <div className="space-y-6">
+              <CareerChart data={analysis.career_recommendations} />
               <SkillGapList items={analysis.skill_gaps} />
               <LearningRoadmap stages={analysis.learning_roadmap} />
             </div>
 
             <div className="space-y-6">
+              <CareerChat profileId={profileId} />
+
               <motion.div
                 whileHover={{ y: -4 }}
                 className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
