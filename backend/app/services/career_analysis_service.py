@@ -3,8 +3,10 @@ from __future__ import annotations
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.models.student_profile import StudentProfile
 from app.models.career_analysis import CareerAnalysis
 from app.schemas.career_analysis import CareerAnalysisCreate
+from app.services.ai_engine import CareerAIEngine
 
 
 class CareerAnalysisService:
@@ -32,3 +34,18 @@ class CareerAnalysisService:
             .order_by(CareerAnalysis.created_at.desc())
         )
         return self.db.scalar(stmt)
+
+    def generate_analysis(self, profile_id: int) -> CareerAnalysis:
+        profile = self.db.get(StudentProfile, profile_id)
+        if profile is None:
+            raise ValueError("Profile not found")
+
+        engine = CareerAIEngine()
+        payload = CareerAnalysisCreate(
+            career_recommendations=engine.generate_career_recommendations(profile),
+            skill_gaps=engine.generate_skill_gaps(profile),
+            learning_roadmap=engine.generate_learning_roadmap(profile),
+            salary_insights=engine.generate_salary_insights(profile),
+            industry_trends=engine.generate_industry_trends(profile),
+        )
+        return self.create_analysis(profile_id, payload)
