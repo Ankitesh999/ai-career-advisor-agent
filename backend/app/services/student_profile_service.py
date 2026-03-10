@@ -16,11 +16,15 @@ class StudentProfileService:
             user_id=user_id,
             name=payload.name,
             twelfth_percentage=payload.twelfth_percentage,
+            cgpa=payload.cgpa,
             degree=payload.degree,
             specialization=payload.specialization,
             current_skills=payload.current_skills,
             interests=payload.interests,
             target_industry=payload.target_industry,
+            projects=payload.projects,
+            internships=payload.internships,
+            certifications=payload.certifications,
         )
         self.db.add(profile)
         self.db.commit()
@@ -48,11 +52,15 @@ class StudentProfileService:
 
         profile.name = payload.name
         profile.twelfth_percentage = payload.twelfth_percentage
+        profile.cgpa = payload.cgpa
         profile.degree = payload.degree
         profile.specialization = payload.specialization
         profile.current_skills = payload.current_skills
         profile.interests = payload.interests
         profile.target_industry = payload.target_industry
+        profile.projects = payload.projects
+        profile.internships = payload.internships
+        profile.certifications = payload.certifications
 
         self.db.commit()
         self.db.refresh(profile)

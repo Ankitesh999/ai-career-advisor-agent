@@ -32,29 +32,42 @@ export default function ProfileForm({
       initialValues?.twelfth_percentage !== undefined
         ? String(initialValues.twelfth_percentage)
         : "",
+    cgpa: initialValues?.cgpa !== undefined ? String(initialValues.cgpa) : "",
     degree: initialValues?.degree ?? "",
     specialization: initialValues?.specialization ?? "",
     current_skills: initialValues?.current_skills?.join(", ") ?? "",
     interests: initialValues?.interests?.join(", ") ?? "",
     target_industry: initialValues?.target_industry ?? "",
+    projects: initialValues?.projects !== undefined ? String(initialValues.projects) : "0",
+    internships:
+      initialValues?.internships !== undefined ? String(initialValues.internships) : "0",
+    certifications:
+      initialValues?.certifications !== undefined
+        ? String(initialValues.certifications)
+        : "0",
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const payload: StudentProfileCreate | null = useMemo(() => {
     const twelfth = Number(form.twelfth_percentage);
-    if (!form.name || Number.isNaN(twelfth)) {
+    const cgpa = Number(form.cgpa);
+    if (!form.name || Number.isNaN(twelfth) || Number.isNaN(cgpa)) {
       return null;
     }
 
     return {
       name: form.name,
       twelfth_percentage: twelfth,
+      cgpa,
       degree: form.degree,
       specialization: form.specialization,
       current_skills: parseCommaList(form.current_skills),
       interests: parseCommaList(form.interests),
       target_industry: form.target_industry,
+      projects: Number(form.projects) || 0,
+      internships: Number(form.internships) || 0,
+      certifications: Number(form.certifications) || 0,
     };
   }, [form]);
 
@@ -111,6 +124,17 @@ export default function ProfileForm({
           />
         </label>
         <label className="flex flex-col gap-2 text-sm font-medium text-slate-200">
+          CGPA
+          <input
+            type="number"
+            step="0.1"
+            className="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-400/50"
+            value={form.cgpa}
+            onChange={(event) => setForm({ ...form, cgpa: event.target.value })}
+            required
+          />
+        </label>
+        <label className="flex flex-col gap-2 text-sm font-medium text-slate-200">
           Degree
           <input
             className="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-400/50"
@@ -159,6 +183,41 @@ export default function ProfileForm({
           required
         />
       </label>
+
+      <div className="grid gap-4 md:grid-cols-3">
+        <label className="flex flex-col gap-2 text-sm font-medium text-slate-200">
+          Projects
+          <input
+            type="number"
+            className="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-400/50"
+            value={form.projects}
+            onChange={(event) => setForm({ ...form, projects: event.target.value })}
+            required
+          />
+        </label>
+        <label className="flex flex-col gap-2 text-sm font-medium text-slate-200">
+          Internships
+          <input
+            type="number"
+            className="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-400/50"
+            value={form.internships}
+            onChange={(event) => setForm({ ...form, internships: event.target.value })}
+            required
+          />
+        </label>
+        <label className="flex flex-col gap-2 text-sm font-medium text-slate-200">
+          Certifications
+          <input
+            type="number"
+            className="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-400/50"
+            value={form.certifications}
+            onChange={(event) =>
+              setForm({ ...form, certifications: event.target.value })
+            }
+            required
+          />
+        </label>
+      </div>
 
       <button
         type="submit"

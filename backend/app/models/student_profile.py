@@ -20,11 +20,15 @@ class StudentProfile(Base):
     )
     name: Mapped[str] = mapped_column(String(200), nullable=False)
     twelfth_percentage: Mapped[float] = mapped_column(Float, nullable=False)
+    cgpa: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
     degree: Mapped[str] = mapped_column(String(200), nullable=False)
     specialization: Mapped[str] = mapped_column(String(200), nullable=False)
     current_skills: Mapped[list[str]] = mapped_column(JSON, nullable=False, default=list)
     interests: Mapped[list[str]] = mapped_column(JSON, nullable=False, default=list)
     target_industry: Mapped[str] = mapped_column(String(200), nullable=False)
+    projects: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    internships: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    certifications: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,

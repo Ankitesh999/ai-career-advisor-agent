@@ -58,6 +58,17 @@ export interface CareerAnalysisRead {
   created_at: string;
 }
 
+export interface EmployabilityScoreRead {
+  id: number;
+  student_profile_id: number;
+  overall_score: number;
+  academic_strength: number;
+  technical_skills: number;
+  industry_readiness: number;
+  resume_quality: number;
+  created_at: string;
+}
+
 export type AuthResponse = {
   access_token: string;
   token_type: string;
@@ -120,6 +131,20 @@ export function generateAnalysis(profileId: number): Promise<CareerAnalysisRead>
 
 export function getAnalysis(profileId: number): Promise<CareerAnalysisRead> {
   return request<CareerAnalysisRead>(`/api/v1/analysis/${profileId}`);
+}
+
+export function getEmployabilityScore(
+  profileId: number
+): Promise<EmployabilityScoreRead> {
+  return request<EmployabilityScoreRead>(`/api/v1/employability/${profileId}`);
+}
+
+export function computeEmployabilityScore(
+  profileId: number
+): Promise<EmployabilityScoreRead> {
+  return request<EmployabilityScoreRead>(`/api/v1/employability/${profileId}`, {
+    method: "POST",
+  });
 }
 
 export function formatINR(value: number) {

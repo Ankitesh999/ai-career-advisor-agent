@@ -5,9 +5,18 @@ import { motion } from "framer-motion";
 
 import CareerChart from "@/components/CareerChart";
 import CareerChat from "@/components/CareerChat";
+import EmployabilityChart from "@/components/EmployabilityChart";
 import LearningRoadmap from "@/components/LearningRoadmap";
 import SkillGapList from "@/components/SkillGapList";
-import { CareerAnalysisRead, formatINR, generateAnalysis, getAnalysis } from "@/lib/api";
+import {
+  CareerAnalysisRead,
+  EmployabilityScoreRead,
+  computeEmployabilityScore,
+  formatINR,
+  generateAnalysis,
+  getAnalysis,
+  getEmployabilityScore,
+} from "@/lib/api";
 
 type AnalysisPageProps = {
   params: Promise<{ id: string }>;
@@ -35,6 +44,9 @@ export default function AnalysisPage({ params }: AnalysisPageProps) {
   const { id } = use(params);
   const profileId = Number(id);
   const [analysis, setAnalysis] = useState<CareerAnalysisRead | null>(null);
+  const [employability, setEmployability] = useState<EmployabilityScoreRead | null>(
+    null
+  );
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [rerunning, setRerunning] = useState(false);
@@ -52,6 +64,13 @@ export default function AnalysisPage({ params }: AnalysisPageProps) {
         const data = await getAnalysis(profileId);
         if (mounted) {
           setAnalysis(data);
+        }
+        try {
+          const score = await getEmployabilityScore(profileId);
+          if (mounted) setEmployability(score);
+        } catch {
+          const score = await computeEmployabilityScore(profileId);
+          if (mounted) setEmployability(score);
         }
       } catch (err) {
         if (!mounted) return;
@@ -100,6 +119,8 @@ export default function AnalysisPage({ params }: AnalysisPageProps) {
       const data = await generateAnalysis(profileId);
       setAnalysis(data);
       setMissing(false);
+      const score = await computeEmployabilityScore(profileId);
+      setEmployability(score);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to re-run analysis.");
     } finally {
@@ -194,12 +215,35 @@ export default function AnalysisPage({ params }: AnalysisPageProps) {
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             <div className="space-y-6">
               <CareerChart data={analysis.career_recommendations} />
+              {employability ? (
+                <div className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-lg backdrop-blur">
+                  <p className="text-xs uppercase tracking-[0.2em] text-slate-400">
+                    Employability Score
+                  </p>
+                  <div className="mt-3 flex items-end justify-between">
+                    <p className="text-4xl font-semibold text-white">
+                      {employability.overall_score}
+                    </p>
+                    <p className="text-sm text-slate-400">out of 100</p>
+                  </div>
+                </div>
+              ) : null}
               <SkillGapList items={analysis.skill_gaps} />
               <LearningRoadmap stages={analysis.learning_roadmap} />
             </div>
 
             <div className="space-y-6">
               <CareerChat profileId={profileId} />
+              {employability ? (
+                <EmployabilityChart
+                  scores={{
+                    academic_strength: employability.academic_strength,
+                    technical_skills: employability.technical_skills,
+                    industry_readiness: employability.industry_readiness,
+                    resume_quality: employability.resume_quality,
+                  }}
+                />
+              ) : null}
 
               <motion.div
                 whileHover={{ y: -4 }}

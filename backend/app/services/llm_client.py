@@ -121,3 +121,28 @@ class LLMClient:
         if not output_text:
             raise ValueError("LLM returned empty response.")
         return output_text
+
+    def generate_employability_adjustments(
+        self,
+        system_prompt: str,
+        user_prompt: str,
+        temperature: float = 0.3,
+        max_output_tokens: int = 300,
+    ) -> dict:
+        client = self._require_client()
+        response = client.models.generate_content(
+            model=self.model,
+            contents=user_prompt,
+            config=types.GenerateContentConfig(
+                system_instruction=system_prompt,
+                response_mime_type="application/json",
+                temperature=temperature,
+                max_output_tokens=max_output_tokens,
+            ),
+        )
+        output_text = getattr(response, "text", None)
+        if not output_text:
+            raise ValueError("LLM returned empty response.")
+
+        data = json.loads(output_text)
+        return data
