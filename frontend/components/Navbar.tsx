@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { clearStoredProfileId } from "@/lib/profile";
+import { clearAuthToken } from "@/lib/api";
 
 export default function Navbar() {
   const router = useRouter();
@@ -10,6 +11,11 @@ export default function Navbar() {
   const handleReset = () => {
     clearStoredProfileId();
     router.push("/create-profile");
+  };
+
+  const handleLogout = () => {
+    clearAuthToken();
+    router.push("/login");
   };
 
   return (
@@ -31,6 +37,13 @@ export default function Navbar() {
             className="text-sm font-medium text-slate-500 transition hover:text-slate-900"
           >
             Reset Profile
+          </button>
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="text-sm font-medium text-slate-500 transition hover:text-slate-900"
+          >
+            Logout
           </button>
         </nav>
       </div>
