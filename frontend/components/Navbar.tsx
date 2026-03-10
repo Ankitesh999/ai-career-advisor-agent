@@ -26,44 +26,47 @@ export default function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 z-50 border-b bg-white/80 px-6 py-4 shadow-sm backdrop-blur">
+    <header className="sticky top-0 z-50 border-b border-white/10 bg-slate-950/70 px-6 py-4 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between">
-        <Link href="/" className="text-lg font-semibold text-slate-900">
+        <Link href="/" className="text-lg font-semibold text-white">
           AI Career Intelligence
         </Link>
-        <nav className="flex items-center gap-6 text-sm font-medium text-slate-600">
-          <Link href="/" className="transition hover:text-slate-900">
+        <nav className="flex items-center gap-6 text-sm font-medium text-slate-300">
+          <Link href="/" className="transition hover:text-white">
             Home
           </Link>
           {isAuthed ? (
             <>
-              <Link href="/dashboard" className="transition hover:text-slate-900">
+              <Link href="/dashboard" className="transition hover:text-white">
                 Dashboard
               </Link>
-              <Link href="/create-profile" className="transition hover:text-slate-900">
+              <Link href="/create-profile" className="transition hover:text-white">
                 Create Profile
               </Link>
               <button
                 type="button"
                 onClick={handleReset}
-                className="text-sm font-medium text-slate-500 transition hover:text-slate-900"
+                className="text-sm font-medium text-slate-400 transition hover:text-white"
               >
                 Reset Profile
               </button>
               <button
                 type="button"
                 onClick={handleLogout}
-                className="text-sm font-medium text-slate-500 transition hover:text-slate-900"
+                className="rounded-full border border-white/10 px-3 py-1 text-sm font-medium text-slate-200 transition hover:border-white/30 hover:text-white"
               >
                 Logout
               </button>
             </>
           ) : (
             <>
-              <Link href="/login" className="transition hover:text-slate-900">
+              <Link href="/login" className="transition hover:text-white">
                 Log In
               </Link>
-              <Link href="/signup" className="transition hover:text-slate-900">
+              <Link
+                href="/signup"
+                className="rounded-full border border-white/20 px-4 py-1 text-white transition hover:border-white/50"
+              >
                 Sign Up
               </Link>
             </>

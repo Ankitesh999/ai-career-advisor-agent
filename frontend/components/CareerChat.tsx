@@ -61,28 +61,28 @@ export default function CareerChat({ profileId }: CareerChatProps) {
   }
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-      <h3 className="text-base font-semibold text-slate-900">AI Career Chat</h3>
-      <p className="mt-1 text-sm text-slate-600">
+    <div className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-lg backdrop-blur">
+      <h3 className="text-base font-semibold text-white">AI Career Chat</h3>
+      <p className="mt-1 text-sm text-slate-300">
         Ask questions about your profile, skill gaps, and next steps.
       </p>
 
       <div
         ref={containerRef}
-        className="mt-4 h-80 space-y-3 overflow-y-auto rounded-xl border border-slate-100 bg-slate-50/60 p-4"
+        className="mt-4 h-80 space-y-3 overflow-y-auto rounded-xl border border-white/10 bg-slate-950/70 p-4"
       >
         {messages.length === 0 ? (
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-slate-400">
             Start the conversation by asking a question.
           </p>
         ) : null}
         {messages.map((message, index) => (
           <div
             key={`${message.role}-${index}`}
-            className={`max-w-[85%] rounded-xl px-3 py-2 text-sm ${
+            className={`max-w-[85%] whitespace-pre-wrap break-words rounded-xl px-3 py-2 text-sm ${
               message.role === "user"
-                ? "ml-auto bg-slate-900 text-white"
-                : "bg-white text-slate-700 shadow-sm"
+                ? "ml-auto bg-white text-slate-900"
+                : "bg-white/10 text-slate-100"
             }`}
           >
             {message.content}
@@ -91,14 +91,14 @@ export default function CareerChat({ profileId }: CareerChatProps) {
         {loading ? <p className="text-xs text-slate-400">AI is thinking...</p> : null}
       </div>
 
-      {error ? <p className="mt-3 text-sm text-red-600">{error}</p> : null}
+      {error ? <p className="mt-3 text-sm text-red-400">{error}</p> : null}
 
       <div className="mt-4 flex gap-2">
         <input
           value={input}
           onChange={(event) => setInput(event.target.value)}
           placeholder="Ask about skill gaps, roles, or roadmap..."
-          className="flex-1 rounded-md border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400"
+          className="flex-1 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-400/50"
           onKeyDown={(event) => {
             if (event.key === "Enter") {
               event.preventDefault();
@@ -109,7 +109,7 @@ export default function CareerChat({ profileId }: CareerChatProps) {
         <button
           onClick={handleSend}
           disabled={loading}
-          className="rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:opacity-70"
+          className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-slate-900 transition hover:bg-slate-200 disabled:opacity-70"
         >
           Send
         </button>

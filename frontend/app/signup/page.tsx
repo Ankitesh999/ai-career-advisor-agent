@@ -30,29 +30,29 @@ export default function SignupPage() {
 
   return (
     <main className="mx-auto max-w-md px-6 py-12">
-      <h1 className="text-2xl font-semibold text-slate-900">Create Account</h1>
-      <p className="mt-2 text-sm text-slate-600">
+      <h1 className="text-2xl font-semibold text-white">Create Account</h1>
+      <p className="mt-2 text-sm text-slate-300">
         Sign up to save your career profiles and insights.
       </p>
       <form
         onSubmit={handleSubmit}
-        className="mt-6 space-y-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+        className="mt-6 space-y-4 rounded-2xl border border-white/10 bg-white/5 p-6 shadow-lg backdrop-blur"
       >
-        <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
+        <label className="flex flex-col gap-2 text-sm font-medium text-slate-200">
           Email
           <input
             type="email"
-            className="rounded-md border border-slate-200 px-3 py-2 text-sm"
+            className="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
             required
           />
         </label>
-        <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
+        <label className="flex flex-col gap-2 text-sm font-medium text-slate-200">
           Password
           <input
             type="password"
-            className="rounded-md border border-slate-200 px-3 py-2 text-sm"
+            className="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
             required
@@ -61,11 +61,11 @@ export default function SignupPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:opacity-70"
+          className="w-full rounded-full bg-white px-4 py-2 text-sm font-semibold text-slate-900 transition hover:bg-slate-200 disabled:opacity-70"
         >
           {loading ? "Creating account..." : "Sign Up"}
         </button>
-        {error ? <p className="text-sm text-red-600">{error}</p> : null}
+        {error ? <p className="text-sm text-red-400">{error}</p> : null}
       </form>
     </main>
   );

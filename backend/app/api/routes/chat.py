@@ -73,7 +73,6 @@ def chat_with_advisor(
             system_prompt=system_prompt,
             user_prompt=user_prompt,
             temperature=0.6,
-            max_output_tokens=400,
         )
     except Exception as exc:
         raise HTTPException(

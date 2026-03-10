@@ -61,8 +61,8 @@ export default function EditProfilePage({ params }: EditProfilePageProps) {
 
   return (
     <main className="mx-auto max-w-3xl px-6 py-10">
-      <h1 className="text-2xl font-semibold text-slate-900">Edit Profile</h1>
-      <p className="mt-2 text-sm text-slate-600">
+      <h1 className="text-2xl font-semibold text-white">Edit Profile</h1>
+      <p className="mt-2 text-sm text-slate-300">
         Update your profile details and re-run AI analysis.
       </p>
       <div className="mt-6">
@@ -74,7 +74,7 @@ export default function EditProfilePage({ params }: EditProfilePageProps) {
             onCreated={() => router.push(`/analysis/${profileId}`)}
           />
         ) : (
-          <p className="text-sm text-slate-500">Loading profile...</p>
+          <p className="text-sm text-slate-400">Loading profile...</p>
         )}
       </div>
     </main>

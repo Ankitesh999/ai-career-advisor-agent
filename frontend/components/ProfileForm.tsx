@@ -85,24 +85,24 @@ export default function ProfileForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="space-y-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
+      className="space-y-6 rounded-2xl border border-white/10 bg-white/5 p-6 shadow-lg backdrop-blur"
     >
       <div className="grid gap-4 md:grid-cols-2">
-        <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
+        <label className="flex flex-col gap-2 text-sm font-medium text-slate-200">
           Name
           <input
-            className="rounded-md border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400"
+            className="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-400/50"
             value={form.name}
             onChange={(event) => setForm({ ...form, name: event.target.value })}
             required
           />
         </label>
-        <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
+        <label className="flex flex-col gap-2 text-sm font-medium text-slate-200">
           12th Percentage
           <input
             type="number"
             step="0.1"
-            className="rounded-md border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400"
+            className="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-400/50"
             value={form.twelfth_percentage}
             onChange={(event) =>
               setForm({ ...form, twelfth_percentage: event.target.value })
@@ -110,19 +110,19 @@ export default function ProfileForm({
             required
           />
         </label>
-        <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
+        <label className="flex flex-col gap-2 text-sm font-medium text-slate-200">
           Degree
           <input
-            className="rounded-md border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400"
+            className="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-400/50"
             value={form.degree}
             onChange={(event) => setForm({ ...form, degree: event.target.value })}
             required
           />
         </label>
-        <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
+        <label className="flex flex-col gap-2 text-sm font-medium text-slate-200">
           Specialization
           <input
-            className="rounded-md border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400"
+            className="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-400/50"
             value={form.specialization}
             onChange={(event) => setForm({ ...form, specialization: event.target.value })}
             required
@@ -130,30 +130,30 @@ export default function ProfileForm({
         </label>
       </div>
 
-      <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
+      <label className="flex flex-col gap-2 text-sm font-medium text-slate-200">
         Current Skills (comma-separated)
         <input
-          className="rounded-md border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400"
+          className="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-400/50"
           value={form.current_skills}
           onChange={(event) => setForm({ ...form, current_skills: event.target.value })}
           placeholder="Python, SQL, TensorFlow"
         />
       </label>
 
-      <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
+      <label className="flex flex-col gap-2 text-sm font-medium text-slate-200">
         Interests (comma-separated)
         <input
-          className="rounded-md border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400"
+          className="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-400/50"
           value={form.interests}
           onChange={(event) => setForm({ ...form, interests: event.target.value })}
           placeholder="AI, Robotics, HealthTech"
         />
       </label>
 
-      <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
+      <label className="flex flex-col gap-2 text-sm font-medium text-slate-200">
         Target Industry
         <input
-          className="rounded-md border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400"
+          className="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-400/50"
           value={form.target_industry}
           onChange={(event) => setForm({ ...form, target_industry: event.target.value })}
           required
@@ -163,12 +163,12 @@ export default function ProfileForm({
       <button
         type="submit"
         disabled={loading}
-        className="inline-flex items-center justify-center rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-70"
+        className="inline-flex items-center justify-center rounded-full bg-white px-4 py-2 text-sm font-semibold text-slate-900 transition hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-70"
       >
         {loading ? "Saving..." : submitLabel ?? "Create Profile"}
       </button>
 
-      {error ? <p className="text-sm text-red-600">{error}</p> : null}
+      {error ? <p className="text-sm text-red-400">{error}</p> : null}
     </form>
   );
 }
