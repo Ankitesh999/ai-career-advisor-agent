@@ -1,0 +1,26 @@
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+
+from app.api.deps import get_db
+from app.schemas.career_analysis import CareerAnalysisCreate, CareerAnalysisRead
+from app.services.career_analysis_service import CareerAnalysisService
+
+router = APIRouter(prefix="/analysis", tags=["career-analysis"])
+
+
+@router.post("/{profile_id}", response_model=CareerAnalysisRead, status_code=status.HTTP_201_CREATED)
+def create_analysis(
+    profile_id: int, payload: CareerAnalysisCreate, db: Session = Depends(get_db)
+) -> CareerAnalysisRead:
+    service = CareerAnalysisService(db)
+    analysis = service.create_analysis(profile_id, payload)
+    return CareerAnalysisRead.model_validate(analysis)
+
+
+@router.get("/{profile_id}", response_model=CareerAnalysisRead)
+def get_analysis(profile_id: int, db: Session = Depends(get_db)) -> CareerAnalysisRead:
+    service = CareerAnalysisService(db)
+    analysis = service.get_analysis_by_profile_id(profile_id)
+    if analysis is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Analysis not found")
+    return CareerAnalysisRead.model_validate(analysis)
