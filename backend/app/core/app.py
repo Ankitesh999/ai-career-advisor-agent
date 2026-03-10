@@ -25,14 +25,11 @@ async def lifespan(app: FastAPI):
 
 def create_app() -> FastAPI:
     settings = get_settings()
-    print(f"[DEBUG] CORS_ORIGINS from env: {settings.cors_origins}")
-    print(f"[DEBUG] ENVIRONMENT: {settings.environment}")
     app = FastAPI(title=settings.app_name, debug=settings.debug, lifespan=lifespan)
 
     cors_origins = (
         settings.cors_origins if settings.cors_origins else ["http://localhost:3000"]
     )
-    print(f"[DEBUG] CORS origins being used: {cors_origins}")
 
     app.add_middleware(
         CORSMiddleware,
