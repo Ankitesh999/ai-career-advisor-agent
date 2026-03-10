@@ -1,6 +1,7 @@
 "use client";
 
 import { use, useEffect, useState } from "react";
+import { motion } from "framer-motion";
 
 import CareerChart from "@/components/CareerChart";
 import LearningRoadmap from "@/components/LearningRoadmap";
@@ -129,7 +130,12 @@ export default function AnalysisPage({ params }: AnalysisPageProps) {
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
 
       {analysis ? (
-        <>
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="space-y-6"
+        >
           <CareerChart data={analysis.career_recommendations} />
 
           <div className="grid gap-6 lg:grid-cols-2">
@@ -139,17 +145,23 @@ export default function AnalysisPage({ params }: AnalysisPageProps) {
             </div>
 
             <div className="space-y-6">
-              <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-                <h3 className="text-sm font-semibold text-slate-700">Salary Insights</h3>
-                <p className="mt-3 text-2xl font-semibold text-slate-900">
+              <motion.div
+                whileHover={{ y: -4 }}
+                className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+              >
+                <h3 className="text-sm font-semibold text-slate-600">
+                  Estimated Entry-Level Salary
+                </h3>
+                <p className="mt-3 text-3xl font-bold text-slate-900">
                   {formatSalaryRange(analysis)}
                 </p>
-                <p className="mt-2 text-sm text-slate-500">
-                  Entry Level AI Roles
-                </p>
-              </div>
+                <p className="mt-2 text-sm text-slate-500">Entry Level AI Roles</p>
+              </motion.div>
 
-              <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+              <motion.div
+                whileHover={{ y: -4 }}
+                className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+              >
                 <h3 className="mb-3 text-sm font-semibold text-slate-700">
                   Industry Trends
                 </h3>
@@ -160,16 +172,16 @@ export default function AnalysisPage({ params }: AnalysisPageProps) {
                       className="flex items-center justify-between"
                     >
                       <span>{trend.trend}</span>
-                      <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-500">
+                      <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-700">
                         {trend.impact.toUpperCase()}
                       </span>
                     </li>
                   ))}
                 </ul>
-              </div>
+              </motion.div>
             </div>
           </div>
-        </>
+        </motion.div>
       ) : null}
     </main>
   );

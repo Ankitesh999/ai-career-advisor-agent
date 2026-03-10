@@ -33,6 +33,7 @@ class Settings(BaseModel):
     db_max_overflow: int = 10
 
     auto_create_tables: bool = False
+    openai_api_key: str | None = None
 
     @field_validator("database_url")
     @classmethod
@@ -58,6 +59,7 @@ class Settings(BaseModel):
             db_pool_size=int(_getenv("DB_POOL_SIZE", "5") or "5"),
             db_max_overflow=int(_getenv("DB_MAX_OVERFLOW", "10") or "10"),
             auto_create_tables=_parse_bool(_getenv("AUTO_CREATE_TABLES"), default=False),
+            openai_api_key=_getenv("OPENAI_API_KEY"),
         )
 
 

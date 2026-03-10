@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { createProfile, StudentProfileCreate, StudentProfileRead } from "@/lib/api";
+import { setStoredProfileId } from "@/lib/profile";
 
 type ProfileFormProps = {
   onCreated?: (profile: StudentProfileRead) => void;
@@ -58,6 +59,7 @@ export default function ProfileForm({ onCreated }: ProfileFormProps) {
     try {
       setLoading(true);
       const result = await createProfile(payload);
+      setStoredProfileId(result.id);
       router.push(`/analysis/${result.id}`);
       onCreated?.(result);
     } catch (err) {

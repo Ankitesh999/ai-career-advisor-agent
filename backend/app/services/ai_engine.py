@@ -1,27 +1,45 @@
 from __future__ import annotations
 
 from collections import defaultdict
+import logging
 
 from app.models.student_profile import StudentProfile
 from app.services.llm_client import LLMClient
+
+
+logger = logging.getLogger(__name__)
 
 
 class CareerAIEngine:
     def __init__(self, use_llm: bool = True) -> None:
         self.use_llm = use_llm
         self._llm_client = LLMClient() if use_llm else None
-        self._llm_cache: dict | None = None
+        self._llm_cache: dict[int, dict] = {}
 
     def _get_llm_output(self, profile: StudentProfile) -> dict:
         if self._llm_client is None:
             raise RuntimeError("LLM client is not configured")
-        if self._llm_cache is None:
-            self._llm_cache = self._llm_client.generate_career_analysis(profile)
-        return self._llm_cache
+        profile_id = profile.id
+        if profile_id is None:
+            raise ValueError("Profile ID is required for LLM caching.")
+        if profile_id not in self._llm_cache:
+            self._llm_cache[profile_id] = self._llm_client.generate_career_analysis(profile)
+        return self._llm_cache[profile_id]
+
+    def _try_llm(self, profile: StudentProfile) -> dict | None:
+        if not self.use_llm:
+            return None
+        try:
+            return self._get_llm_output(profile)
+        except Exception as exc:
+            logger.warning("LLM failed, falling back to rule engine: %s", exc)
+            self.use_llm = False
+            return None
 
     def generate_career_recommendations(self, profile: StudentProfile) -> list[dict]:
-        if self.use_llm:
-            return self._get_llm_output(profile)["career_recommendations"]
+        llm_output = self._try_llm(profile)
+        if llm_output:
+            return llm_output["career_recommendations"]
         roles: dict[str, int] = defaultdict(int)
 
         specialization = profile.specialization.lower()
@@ -62,8 +80,9 @@ class CareerAIEngine:
         return recommendations[:5]
 
     def generate_skill_gaps(self, profile: StudentProfile) -> list[dict]:
-        if self.use_llm:
-            return self._get_llm_output(profile)["skill_gaps"]
+        llm_output = self._try_llm(profile)
+        if llm_output:
+            return llm_output["skill_gaps"]
         skills = {skill.lower() for skill in profile.current_skills}
         gaps: list[dict] = []
 
@@ -89,8 +108,9 @@ class CareerAIEngine:
         return gaps
 
     def generate_learning_roadmap(self, profile: StudentProfile) -> list[dict]:
-        if self.use_llm:
-            return self._get_llm_output(profile)["learning_roadmap"]
+        llm_output = self._try_llm(profile)
+        if llm_output:
+            return llm_output["learning_roadmap"]
         roadmap: list[dict] = []
 
         if "ai" in profile.specialization.lower() or "machine learning" in profile.specialization.lower():
@@ -121,8 +141,9 @@ class CareerAIEngine:
         return roadmap
 
     def generate_salary_insights(self, profile: StudentProfile) -> dict:
-        if self.use_llm:
-            return self._get_llm_output(profile)["salary_insights"]
+        llm_output = self._try_llm(profile)
+        if llm_output:
+            return llm_output["salary_insights"]
         base = 60000
         specialization = profile.specialization.lower()
         skills = {skill.lower() for skill in profile.current_skills}
@@ -149,8 +170,9 @@ class CareerAIEngine:
         }
 
     def generate_industry_trends(self, profile: StudentProfile) -> list[dict]:
-        if self.use_llm:
-            return self._get_llm_output(profile)["industry_trends"]
+        llm_output = self._try_llm(profile)
+        if llm_output:
+            return llm_output["industry_trends"]
         specialization = profile.specialization.lower()
         trends: list[dict] = []
 
