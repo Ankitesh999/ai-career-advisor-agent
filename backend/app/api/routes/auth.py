@@ -3,7 +3,8 @@ from pydantic import BaseModel, EmailStr
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_db
+from app.api.deps import get_current_user, get_db
+from app.core.config import get_settings
 from app.core.security import create_access_token, hash_password, verify_password
 from app.models.user import User
 
@@ -23,6 +24,11 @@ class LoginRequest(BaseModel):
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
+
+
+class MeResponse(BaseModel):
+    email: EmailStr
+    role: str
 
 
 @router.post("/register", status_code=status.HTTP_201_CREATED)
@@ -54,5 +60,14 @@ def login(payload: LoginRequest, db: Session = Depends(get_db)) -> TokenResponse
     if user is None or not verify_password(payload.password, user.password_hash):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
 
-    token = create_access_token(str(user.id))
+    settings = get_settings()
+    role = "admin" if user.email.lower() in settings.admin_emails else "user"
+    token = create_access_token(str(user.id), role=role)
     return TokenResponse(access_token=token)
+
+
+@router.get("/me", response_model=MeResponse)
+def me(user: User = Depends(get_current_user)) -> MeResponse:
+    settings = get_settings()
+    role = "admin" if user.email.lower() in settings.admin_emails else "user"
+    return MeResponse(email=user.email, role=role)

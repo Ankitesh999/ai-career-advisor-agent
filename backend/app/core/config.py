@@ -38,6 +38,7 @@ class Settings(BaseModel):
     jwt_secret: str = "change-me"
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 60
+    admin_emails: list[str] = []
 
     @field_validator("database_url")
     @classmethod
@@ -70,6 +71,11 @@ class Settings(BaseModel):
             access_token_expire_minutes=int(
                 _getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "60") or "60"
             ),
+            admin_emails=[
+                email.strip().lower()
+                for email in (_getenv("ADMIN_EMAILS", "") or "").split(",")
+                if email.strip()
+            ],
         )
 
 

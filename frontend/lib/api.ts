@@ -1,5 +1,6 @@
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "";
 const TOKEN_KEY = "auth_token";
+const ROLE_KEY = "auth_role";
 
 type JsonValue =
   | string
@@ -110,9 +111,34 @@ export interface PlacementRiskRead {
   created_at: string;
 }
 
+export interface AdminMetricsRead {
+  total_profiles: number;
+  total_students: number;
+  placement_ready: number;
+  needs_training: number;
+  high_risk: number;
+}
+
+export interface AdminStudentRead {
+  profile_id: number;
+  user_id: number;
+  name: string;
+  degree: string;
+  specialization: string;
+  cgpa: number;
+  created_at: string;
+  employability_score: number | null;
+  placement_risk: string | null;
+}
+
 export type AuthResponse = {
   access_token: string;
   token_type: string;
+};
+
+export type MeResponse = {
+  email: string;
+  role: string;
 };
 
 export function setAuthToken(token: string) {
@@ -123,6 +149,21 @@ export function setAuthToken(token: string) {
 export function clearAuthToken() {
   if (typeof window === "undefined") return;
   localStorage.removeItem(TOKEN_KEY);
+}
+
+export function setAuthRole(role: string) {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(ROLE_KEY, role);
+}
+
+export function getAuthRole(): string | null {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem(ROLE_KEY);
+}
+
+export function clearAuthRole() {
+  if (typeof window === "undefined") return;
+  localStorage.removeItem(ROLE_KEY);
 }
 
 export async function registerUser(email: string, password: string): Promise<void> {
@@ -137,6 +178,10 @@ export async function loginUser(email: string, password: string): Promise<AuthRe
     method: "POST",
     body: JSON.stringify({ email, password }),
   });
+}
+
+export async function getMe(): Promise<MeResponse> {
+  return request<MeResponse>("/api/v1/auth/me");
 }
 
 export function createProfile(payload: StudentProfileCreate): Promise<StudentProfileRead> {
@@ -218,6 +263,14 @@ export function generatePlacementRisk(
   return request<PlacementRiskRead>(`/api/v1/placement-risk/${profileId}`, {
     method: "POST",
   });
+}
+
+export function getAdminMetrics(): Promise<AdminMetricsRead> {
+  return request<AdminMetricsRead>("/api/v1/admin/metrics");
+}
+
+export function listAdminStudents(): Promise<AdminStudentRead[]> {
+  return request<AdminStudentRead[]>("/api/v1/admin/students");
 }
 
 export async function uploadResume(

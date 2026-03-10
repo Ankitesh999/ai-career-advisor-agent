@@ -4,14 +4,16 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { clearStoredProfileId } from "@/lib/profile";
-import { clearAuthToken } from "@/lib/api";
+import { clearAuthRole, clearAuthToken, getAuthRole } from "@/lib/api";
 
 export default function Navbar() {
   const router = useRouter();
   const [isAuthed, setIsAuthed] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     setIsAuthed(Boolean(localStorage.getItem("auth_token")));
+    setIsAdmin(getAuthRole() === "admin");
   }, []);
 
   const handleReset = () => {
@@ -21,6 +23,7 @@ export default function Navbar() {
 
   const handleLogout = () => {
     clearAuthToken();
+    clearAuthRole();
     clearStoredProfileId();
     router.push("/login");
   };
@@ -40,6 +43,11 @@ export default function Navbar() {
               <Link href="/dashboard" className="transition hover:text-white">
                 Dashboard
               </Link>
+              {isAdmin ? (
+                <Link href="/admin/dashboard" className="transition hover:text-white">
+                  Admin Dashboard
+                </Link>
+              ) : null}
               <Link href="/resume" className="transition hover:text-white">
                 Resume Scan
               </Link>

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { loginUser, registerUser, setAuthToken } from "@/lib/api";
+import { getMe, loginUser, registerUser, setAuthRole, setAuthToken } from "@/lib/api";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -20,7 +20,9 @@ export default function SignupPage() {
       await registerUser(email, password);
       const token = await loginUser(email, password);
       setAuthToken(token.access_token);
-      router.push("/create-profile");
+      const me = await getMe();
+      setAuthRole(me.role);
+      router.push("/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Signup failed.");
     } finally {

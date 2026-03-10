@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 
 from app.api.routes.auth import router as auth_router
+from app.api.routes.admin_dashboard import router as admin_dashboard_router
 from app.api.routes.chat import router as chat_router
 from app.api.routes.company_fit import router as company_fit_router
 from app.api.routes.employability import router as employability_router
@@ -15,6 +16,7 @@ from app.api.routes.users import router as users_router
 api_router = APIRouter()
 api_router.include_router(health_router)
 api_router.include_router(auth_router, prefix="/api/v1")
+api_router.include_router(admin_dashboard_router, prefix="/api/v1")
 api_router.include_router(chat_router, prefix="/api/v1")
 api_router.include_router(company_fit_router, prefix="/api/v1")
 api_router.include_router(employability_router, prefix="/api/v1")

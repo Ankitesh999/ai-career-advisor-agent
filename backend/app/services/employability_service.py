@@ -89,9 +89,11 @@ class EmployabilityService:
             "resume_quality": resume,
         }
 
-    def compute_score(self, profile_id: int, user_id: int) -> EmployabilityScore:
+    def compute_score(
+        self, profile_id: int, user_id: int, allow_admin: bool = False
+    ) -> EmployabilityScore:
         profile = self.db.get(StudentProfile, profile_id)
-        if profile is None or profile.user_id != user_id:
+        if profile is None or (profile.user_id != user_id and not allow_admin):
             raise ValueError("Profile not found")
 
         scores = self._base_scores(profile)
@@ -111,9 +113,11 @@ class EmployabilityService:
         self.db.refresh(record)
         return record
 
-    def get_latest_score(self, profile_id: int, user_id: int) -> EmployabilityScore | None:
+    def get_latest_score(
+        self, profile_id: int, user_id: int, allow_admin: bool = False
+    ) -> EmployabilityScore | None:
         profile = self.db.get(StudentProfile, profile_id)
-        if profile is None or profile.user_id != user_id:
+        if profile is None or (profile.user_id != user_id and not allow_admin):
             return None
         stmt = (
             select(EmployabilityScore)

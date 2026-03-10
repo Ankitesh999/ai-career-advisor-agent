@@ -6,9 +6,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_user, get_db
+from app.api.deps import get_current_user_context, get_db
 from app.models.student_profile import StudentProfile
-from app.models.user import User
 from app.services.career_analysis_service import CareerAnalysisService
 from app.services.llm_client import LLMClient
 
@@ -28,14 +27,17 @@ def chat_with_advisor(
     profile_id: int,
     payload: ChatRequest,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    context=Depends(get_current_user_context),
 ) -> ChatResponse:
+    current_user, role = context
     profile = db.get(StudentProfile, profile_id)
-    if profile is None or profile.user_id != current_user.id:
+    if profile is None or (profile.user_id != current_user.id and role != "admin"):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Profile not found")
 
     analysis_service = CareerAnalysisService(db)
-    analysis = analysis_service.get_analysis_by_profile_id(profile_id, current_user.id)
+    analysis = analysis_service.get_analysis_by_profile_id(
+        profile_id, current_user.id, allow_admin=role == "admin"
+    )
     if analysis is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Analysis not found")
 

@@ -3,12 +3,13 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { loginUser, setAuthToken } from "@/lib/api";
+import { clearAuthRole, clearAuthToken, getMe, loginUser, setAuthRole, setAuthToken } from "@/lib/api";
 
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isAdminLogin, setIsAdminLogin] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -19,7 +20,21 @@ export default function LoginPage() {
       setLoading(true);
       const result = await loginUser(email, password);
       setAuthToken(result.access_token);
-      router.push("/create-profile");
+      const me = await getMe();
+      setAuthRole(me.role);
+
+      if (isAdminLogin) {
+        if (me.role !== "admin") {
+          clearAuthToken();
+          clearAuthRole();
+          setError("Not an admin account.");
+          return;
+        }
+        router.push("/admin/dashboard");
+        return;
+      }
+
+      router.push("/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed.");
     } finally {
@@ -56,6 +71,15 @@ export default function LoginPage() {
             onChange={(event) => setPassword(event.target.value)}
             required
           />
+        </label>
+        <label className="flex items-center gap-2 text-sm text-slate-300">
+          <input
+            type="checkbox"
+            checked={isAdminLogin}
+            onChange={(event) => setIsAdminLogin(event.target.checked)}
+            className="h-4 w-4 rounded border-white/20 bg-white/10 text-indigo-400"
+          />
+          Admin Login
         </label>
         <button
           type="submit"

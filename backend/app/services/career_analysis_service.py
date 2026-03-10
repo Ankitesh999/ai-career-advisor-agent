@@ -28,7 +28,7 @@ class CareerAnalysisService:
         return analysis
 
     def get_analysis_by_profile_id(
-        self, profile_id: int, user_id: int
+        self, profile_id: int, user_id: int, allow_admin: bool = False
     ) -> CareerAnalysis | None:
         stmt = (
             select(CareerAnalysis)
@@ -38,14 +38,17 @@ class CareerAnalysisService:
         analysis = self.db.scalar(stmt)
         if analysis is None:
             return None
-        profile = self.db.get(StudentProfile, profile_id)
-        if profile is None or profile.user_id != user_id:
-            return None
+        if not allow_admin:
+            profile = self.db.get(StudentProfile, profile_id)
+            if profile is None or profile.user_id != user_id:
+                return None
         return analysis
 
-    def generate_analysis(self, profile_id: int, user_id: int) -> CareerAnalysis:
+    def generate_analysis(
+        self, profile_id: int, user_id: int, allow_admin: bool = False
+    ) -> CareerAnalysis:
         profile = self.db.get(StudentProfile, profile_id)
-        if profile is None or profile.user_id != user_id:
+        if profile is None or (profile.user_id != user_id and not allow_admin):
             raise ValueError("Profile not found")
 
         engine = CareerAIEngine()
