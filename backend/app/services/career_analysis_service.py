@@ -27,17 +27,25 @@ class CareerAnalysisService:
         self.db.refresh(analysis)
         return analysis
 
-    def get_analysis_by_profile_id(self, profile_id: int) -> CareerAnalysis | None:
+    def get_analysis_by_profile_id(
+        self, profile_id: int, user_id: int
+    ) -> CareerAnalysis | None:
         stmt = (
             select(CareerAnalysis)
             .where(CareerAnalysis.student_profile_id == profile_id)
             .order_by(CareerAnalysis.created_at.desc())
         )
-        return self.db.scalar(stmt)
-
-    def generate_analysis(self, profile_id: int) -> CareerAnalysis:
+        analysis = self.db.scalar(stmt)
+        if analysis is None:
+            return None
         profile = self.db.get(StudentProfile, profile_id)
-        if profile is None:
+        if profile is None or profile.user_id != user_id:
+            return None
+        return analysis
+
+    def generate_analysis(self, profile_id: int, user_id: int) -> CareerAnalysis:
+        profile = self.db.get(StudentProfile, profile_id)
+        if profile is None or profile.user_id != user_id:
             raise ValueError("Profile not found")
 
         engine = CareerAIEngine()

@@ -11,8 +11,9 @@ class StudentProfileService:
     def __init__(self, db: Session) -> None:
         self.db = db
 
-    def create_profile(self, payload: StudentProfileCreate) -> StudentProfile:
+    def create_profile(self, payload: StudentProfileCreate, user_id: int) -> StudentProfile:
         profile = StudentProfile(
+            user_id=user_id,
             name=payload.name,
             twelfth_percentage=payload.twelfth_percentage,
             degree=payload.degree,
@@ -26,10 +27,14 @@ class StudentProfileService:
         self.db.refresh(profile)
         return profile
 
-    def get_profile_by_id(self, profile_id: int) -> StudentProfile | None:
-        stmt = select(StudentProfile).where(StudentProfile.id == profile_id)
+    def get_profile_by_id(self, profile_id: int, user_id: int) -> StudentProfile | None:
+        stmt = select(StudentProfile).where(
+            StudentProfile.id == profile_id, StudentProfile.user_id == user_id
+        )
         return self.db.scalar(stmt)
 
-    def list_profiles(self) -> list[StudentProfile]:
-        stmt = select(StudentProfile).order_by(StudentProfile.id)
+    def list_profiles(self, user_id: int) -> list[StudentProfile]:
+        stmt = select(StudentProfile).where(StudentProfile.user_id == user_id).order_by(
+            StudentProfile.id
+        )
         return list(self.db.scalars(stmt))

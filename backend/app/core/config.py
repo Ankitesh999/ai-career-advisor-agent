@@ -34,6 +34,9 @@ class Settings(BaseModel):
 
     auto_create_tables: bool = False
     openai_api_key: str | None = None
+    jwt_secret: str = "change-me"
+    jwt_algorithm: str = "HS256"
+    access_token_expire_minutes: int = 60
 
     @field_validator("database_url")
     @classmethod
@@ -60,6 +63,11 @@ class Settings(BaseModel):
             db_max_overflow=int(_getenv("DB_MAX_OVERFLOW", "10") or "10"),
             auto_create_tables=_parse_bool(_getenv("AUTO_CREATE_TABLES"), default=False),
             openai_api_key=_getenv("OPENAI_API_KEY"),
+            jwt_secret=_getenv("JWT_SECRET", "change-me") or "change-me",
+            jwt_algorithm=_getenv("JWT_ALGORITHM", "HS256") or "HS256",
+            access_token_expire_minutes=int(
+                _getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "60") or "60"
+            ),
         )
 
 
