@@ -5,16 +5,20 @@ import { motion } from "framer-motion";
 
 import CareerChart from "@/components/CareerChart";
 import CareerChat from "@/components/CareerChat";
+import CompanyFitChart from "@/components/CompanyFitChart";
 import EmployabilityChart from "@/components/EmployabilityChart";
 import LearningRoadmap from "@/components/LearningRoadmap";
 import SkillGapList from "@/components/SkillGapList";
 import {
   CareerAnalysisRead,
+  CompanyFitRead,
   EmployabilityScoreRead,
+  generateCompanyFit,
   computeEmployabilityScore,
   formatINR,
   generateAnalysis,
   getAnalysis,
+  getCompanyFit,
   getEmployabilityScore,
 } from "@/lib/api";
 
@@ -44,6 +48,7 @@ export default function AnalysisPage({ params }: AnalysisPageProps) {
   const { id } = use(params);
   const profileId = Number(id);
   const [analysis, setAnalysis] = useState<CareerAnalysisRead | null>(null);
+  const [companyFit, setCompanyFit] = useState<CompanyFitRead | null>(null);
   const [employability, setEmployability] = useState<EmployabilityScoreRead | null>(
     null
   );
@@ -71,6 +76,13 @@ export default function AnalysisPage({ params }: AnalysisPageProps) {
         } catch {
           const score = await computeEmployabilityScore(profileId);
           if (mounted) setEmployability(score);
+        }
+        try {
+          const fit = await getCompanyFit(profileId);
+          if (mounted) setCompanyFit(fit);
+        } catch {
+          const fit = await generateCompanyFit(profileId);
+          if (mounted) setCompanyFit(fit);
         }
       } catch (err) {
         if (!mounted) return;
@@ -121,6 +133,8 @@ export default function AnalysisPage({ params }: AnalysisPageProps) {
       setMissing(false);
       const score = await computeEmployabilityScore(profileId);
       setEmployability(score);
+      const fit = await generateCompanyFit(profileId);
+      setCompanyFit(fit);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to re-run analysis.");
     } finally {
@@ -215,6 +229,7 @@ export default function AnalysisPage({ params }: AnalysisPageProps) {
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             <div className="space-y-6">
               <CareerChart data={analysis.career_recommendations} />
+              {companyFit ? <CompanyFitChart data={companyFit.matches} /> : null}
               {employability ? (
                 <div className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-lg backdrop-blur">
                   <p className="text-xs uppercase tracking-[0.2em] text-slate-400">

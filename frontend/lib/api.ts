@@ -88,6 +88,13 @@ export interface EmployabilityScoreRead {
   created_at: string;
 }
 
+export interface CompanyFitRead {
+  id: number;
+  student_profile_id: number;
+  matches: { company: string; score: number; rationale?: string | null }[];
+  created_at: string;
+}
+
 export type AuthResponse = {
   access_token: string;
   token_type: string;
@@ -162,6 +169,16 @@ export function computeEmployabilityScore(
   profileId: number
 ): Promise<EmployabilityScoreRead> {
   return request<EmployabilityScoreRead>(`/api/v1/employability/${profileId}`, {
+    method: "POST",
+  });
+}
+
+export function getCompanyFit(profileId: number): Promise<CompanyFitRead> {
+  return request<CompanyFitRead>(`/api/v1/company-fit/${profileId}`);
+}
+
+export function generateCompanyFit(profileId: number): Promise<CompanyFitRead> {
+  return request<CompanyFitRead>(`/api/v1/company-fit/${profileId}`, {
     method: "POST",
   });
 }

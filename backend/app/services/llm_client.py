@@ -146,3 +146,29 @@ class LLMClient:
 
         data = json.loads(output_text)
         return data
+
+    def generate_company_fit_adjustments(
+        self,
+        system_prompt: str,
+        user_prompt: str,
+        temperature: float = 0.4,
+        max_output_tokens: int = 200,
+    ) -> dict:
+        client = self._require_client()
+        response = client.models.generate_content(
+            model=self.model,
+            contents=user_prompt,
+            config=types.GenerateContentConfig(
+                system_instruction=system_prompt,
+                response_mime_type="application/json",
+                temperature=temperature,
+                max_output_tokens=max_output_tokens,
+            ),
+        )
+        output_text = getattr(response, "text", None)
+        if not output_text:
+            raise ValueError("LLM returned empty response.")
+        data = json.loads(output_text)
+        if not isinstance(data, dict):
+            raise ValueError("LLM response must be a JSON object.")
+        return data
