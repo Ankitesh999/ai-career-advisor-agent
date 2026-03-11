@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 
 import ProfileForm from "@/components/ProfileForm";
 import { StudentProfileCreate, getProfile, updateProfile } from "@/lib/api";
+import { setStoredUserType } from "@/lib/profile";
 
 type EditProfilePageProps = {
   params: Promise<{ id: string }>;
@@ -16,6 +17,7 @@ export default function EditProfilePage({ params }: EditProfilePageProps) {
   const router = useRouter();
   const [initialValues, setInitialValues] = useState<StudentProfileCreate | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [formType, setFormType] = useState<"twelfth" | "college">("college");
 
   useEffect(() => {
     let mounted = true;
@@ -23,6 +25,8 @@ export default function EditProfilePage({ params }: EditProfilePageProps) {
       try {
         const profile = await getProfile(profileId);
         if (mounted) {
+          const isTwelfthStudent = profile.user_type === "twelfth_student" || (!profile.degree);
+          setFormType(isTwelfthStudent ? "twelfth" : "college");
           setInitialValues({
             name: profile.name,
             twelfth_percentage: profile.twelfth_percentage,
@@ -35,6 +39,7 @@ export default function EditProfilePage({ params }: EditProfilePageProps) {
             projects: profile.projects ?? 0,
             internships: profile.internships ?? 0,
             certifications: profile.certifications ?? 0,
+            user_type: profile.user_type,
           });
         }
       } catch (err) {
@@ -73,8 +78,13 @@ export default function EditProfilePage({ params }: EditProfilePageProps) {
         {initialValues ? (
           <ProfileForm
             initialValues={initialValues}
+            formType={formType}
             submitLabel="Save Changes"
-            onSubmitOverride={(payload) => updateProfile(profileId, payload)}
+            onSubmitOverride={async (payload) => {
+              const userType = payload.user_type || (formType === "twelfth" ? "twelfth_student" : "college_student");
+              setStoredUserType(userType);
+              return updateProfile(profileId, payload);
+            }}
             onCreated={() => router.push(`/analysis/${profileId}`)}
           />
         ) : (

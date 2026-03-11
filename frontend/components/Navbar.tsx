@@ -44,22 +44,28 @@ export default function Navbar() {
               <Link href="/dashboard" className="transition hover:text-white">
                 Dashboard
               </Link>
-              <Link href="/training" className="transition hover:text-white">
-                Training
-              </Link>
-              <Link href="/internship" className="transition hover:text-white">
-                Internship Readiness
-              </Link>
+              {!isAdmin && (
+                <>
+                  <Link href="/training" className="transition hover:text-white">
+                    Training
+                  </Link>
+                  <Link href="/internship" className="transition hover:text-white">
+                    Internship Readiness
+                  </Link>
+                </>
+              )}
               {isAdmin ? (
                 <Link href="/admin/dashboard" className="transition hover:text-white">
                   Admin Dashboard
                 </Link>
               ) : null}
-              <Link href="/resume" className="transition hover:text-white">
-                Resume Scan
-              </Link>
-              <Link href="/create-profile" className="transition hover:text-white">
-                Create Profile
+              {!isAdmin && (
+                <Link href="/resume" className="transition hover:text-white">
+                  Resume Scan
+                </Link>
+              )}
+              <Link href="/profile" className="transition hover:text-white">
+                Profile
               </Link>
               <button
                 type="button"

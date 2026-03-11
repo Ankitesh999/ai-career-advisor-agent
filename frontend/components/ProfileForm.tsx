@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { createProfile, StudentProfileCreate, StudentProfileRead } from "@/lib/api";
-import { setStoredProfileId } from "@/lib/profile";
+import { setStoredProfileId, setStoredUserType } from "@/lib/profile";
 
 type ProfileFormProps = {
   onCreated?: (profile: StudentProfileRead) => void;
@@ -58,6 +58,8 @@ export default function ProfileForm({
       return null;
     }
 
+    const userType = formType === "twelfth" ? "twelfth_student" : "college_student";
+
     return {
       name: form.name,
       twelfth_percentage: twelfth,
@@ -70,8 +72,9 @@ export default function ProfileForm({
       projects: Number(form.projects) || 0,
       internships: Number(form.internships) || 0,
       certifications: Number(form.certifications) || 0,
+      user_type: userType,
     };
-  }, [form]);
+  }, [form, formType]);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -88,6 +91,8 @@ export default function ProfileForm({
         ? await onSubmitOverride(payload)
         : await createProfile(payload);
       setStoredProfileId(result.id);
+      const userType = payload.user_type || (formType === "twelfth" ? "twelfth_student" : "college_student");
+      setStoredUserType(userType);
       router.push(`/analysis/${result.id}`);
       onCreated?.(result);
     } catch (err) {

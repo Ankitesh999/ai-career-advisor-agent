@@ -1,18 +1,13 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
-import Link from "next/link";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { StudentProfileRead, getProfile } from "@/lib/api";
+import { StudentProfileRead, listProfiles } from "@/lib/api";
+import { getStoredProfileId, setStoredProfileId } from "@/lib/profile";
+import Link from "next/link";
 
-type ProfilePageProps = {
-  params: Promise<{ id: string }>;
-};
-
-export default function ProfilePage({ params }: ProfilePageProps) {
-  const { id } = use(params);
-  const profileId = Number(id);
+export default function ProfileIndexPage() {
   const router = useRouter();
   const [profile, setProfile] = useState<StudentProfileRead | null>(null);
   const [loading, setLoading] = useState(true);
@@ -22,11 +17,37 @@ export default function ProfilePage({ params }: ProfilePageProps) {
     let mounted = true;
 
     async function load() {
+      setLoading(true);
+      setError(null);
       try {
-        const data = await getProfile(profileId);
-        if (mounted) {
-          setProfile(data);
+        const storedId = getStoredProfileId();
+        
+        if (storedId) {
+          const profiles = await listProfiles();
+          const found = profiles.find(p => p.id === Number(storedId));
+          if (found && mounted) {
+            setProfile(found);
+            setLoading(false);
+            return;
+          }
         }
+
+        const profiles = await listProfiles();
+        if (!mounted) return;
+
+        if (profiles.length === 0) {
+          router.push("/create-profile");
+          return;
+        }
+
+        const latestProfile = profiles.reduce((latest, current) => {
+          const latestDate = new Date(latest.created_at).getTime();
+          const currentDate = new Date(current.created_at).getTime();
+          return currentDate > latestDate ? current : latest;
+        });
+
+        setStoredProfileId(latestProfile.id);
+        setProfile(latestProfile);
       } catch (err) {
         if (mounted) {
           setError(err instanceof Error ? err.message : "Failed to load profile.");
@@ -36,17 +57,12 @@ export default function ProfilePage({ params }: ProfilePageProps) {
       }
     }
 
-    if (!Number.isNaN(profileId)) {
-      void load();
-    } else {
-      setError("Invalid profile ID.");
-      setLoading(false);
-    }
+    void load();
 
     return () => {
       mounted = false;
     };
-  }, [profileId]);
+  }, [router]);
 
   if (loading) {
     return (
@@ -67,7 +83,10 @@ export default function ProfilePage({ params }: ProfilePageProps) {
   if (!profile) {
     return (
       <main className="mx-auto max-w-4xl px-6 py-10">
-        <p className="text-sm text-slate-300">Profile not found.</p>
+        <p className="text-sm text-slate-300">No profile found.</p>
+        <Link href="/create-profile" className="mt-4 inline-block text-white hover:underline">
+          Create a new profile
+        </Link>
       </main>
     );
   }
@@ -76,19 +95,11 @@ export default function ProfilePage({ params }: ProfilePageProps) {
 
   return (
     <main className="mx-auto max-w-4xl space-y-6 px-6 py-10">
-      <header className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold text-white">Your Profile</h1>
-          <p className="text-sm text-slate-300">
-            View and manage your profile information.
-          </p>
-        </div>
-        <Link
-          href="/profile"
-          className="text-sm text-slate-300 hover:text-white"
-        >
-          Switch Profile
-        </Link>
+      <header className="space-y-2">
+        <h1 className="text-2xl font-semibold text-white">Your Profile</h1>
+        <p className="text-sm text-slate-300">
+          View and manage your profile information.
+        </p>
       </header>
 
       <div className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-lg backdrop-blur">
