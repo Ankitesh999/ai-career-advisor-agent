@@ -1,27 +1,30 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { clearStoredProfileId, clearStoredUserType, getStoredUserType } from "@/lib/profile";
 import { clearAuthRole, clearAuthToken, getAuthRole } from "@/lib/api";
 
 export default function Navbar() {
   const router = useRouter();
+  const pathname = usePathname();
   const [isAuthed, setIsAuthed] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [userType, setUserType] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     setIsAuthed(Boolean(localStorage.getItem("auth_token")));
     setIsAdmin(getAuthRole() === "admin");
-    setUserType(getStoredUserType());
-  }, []);
+  }, [pathname]);
+
+  const userType = mounted ? getStoredUserType() : null;
 
   const handleReset = () => {
     clearStoredProfileId();
     clearStoredUserType();
-    router.push("/create-profile");
+    router.push("/");
   };
 
   const handleLogout = () => {
@@ -70,13 +73,6 @@ export default function Navbar() {
               <Link href="/profile" className="transition hover:text-white">
                 Profile
               </Link>
-              <button
-                type="button"
-                onClick={handleReset}
-                className="text-sm font-medium text-slate-400 transition hover:text-white"
-              >
-                Reset Profile
-              </button>
               <button
                 type="button"
                 onClick={handleLogout}

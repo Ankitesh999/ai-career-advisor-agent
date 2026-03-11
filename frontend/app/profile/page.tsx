@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { StudentProfileRead, listProfiles } from "@/lib/api";
-import { getStoredProfileId, setStoredProfileId } from "@/lib/profile";
+import { clearStoredProfileId, clearStoredUserType, getStoredProfileId, setStoredProfileId } from "@/lib/profile";
 import Link from "next/link";
 
 export default function ProfileIndexPage() {
@@ -12,6 +12,12 @@ export default function ProfileIndexPage() {
   const [profile, setProfile] = useState<StudentProfileRead | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const handleReset = () => {
+    clearStoredProfileId();
+    clearStoredUserType();
+    router.push("/");
+  };
 
   useEffect(() => {
     let mounted = true;
@@ -177,6 +183,13 @@ export default function ProfileIndexPage() {
           >
             Go to Dashboard
           </Link>
+          <button
+            type="button"
+            onClick={handleReset}
+            className="rounded-full border border-red-500/30 px-4 py-2 text-sm font-semibold text-red-400 transition hover:border-red-500/50 hover:bg-red-500/10"
+          >
+            Reset Profile
+          </button>
         </div>
       </div>
     </main>
