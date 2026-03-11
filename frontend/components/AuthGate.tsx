@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { getAuthRole } from "@/lib/api";
 
-const PUBLIC_PATHS = ["/login", "/signup"];
+const PUBLIC_PATHS = ["/", "/login", "/signup"];
 
 export default function AuthGate() {
   const router = useRouter();
