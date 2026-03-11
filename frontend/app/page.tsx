@@ -63,7 +63,7 @@ export default function HomePage() {
         >
           <div className="space-y-6">
             <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-slate-200">
-              SAGE – AI Career Intelligence
+              SAGE AI Career Navigator
             </div>
             <h1 className="bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-5xl font-bold tracking-tight text-transparent sm:text-6xl">
               Choose Your Path

@@ -3,21 +3,24 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { clearStoredProfileId } from "@/lib/profile";
+import { clearStoredProfileId, clearStoredUserType, getStoredUserType } from "@/lib/profile";
 import { clearAuthRole, clearAuthToken, getAuthRole } from "@/lib/api";
 
 export default function Navbar() {
   const router = useRouter();
   const [isAuthed, setIsAuthed] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [userType, setUserType] = useState<string | null>(null);
 
   useEffect(() => {
     setIsAuthed(Boolean(localStorage.getItem("auth_token")));
     setIsAdmin(getAuthRole() === "admin");
+    setUserType(getStoredUserType());
   }, []);
 
   const handleReset = () => {
     clearStoredProfileId();
+    clearStoredUserType();
     router.push("/create-profile");
   };
 
@@ -44,7 +47,7 @@ export default function Navbar() {
               <Link href="/dashboard" className="transition hover:text-white">
                 Dashboard
               </Link>
-              {!isAdmin && (
+              {!isAdmin && userType !== "twelfth_student" && (
                 <>
                   <Link href="/training" className="transition hover:text-white">
                     Training
@@ -59,7 +62,7 @@ export default function Navbar() {
                   Admin Dashboard
                 </Link>
               ) : null}
-              {!isAdmin && (
+              {!isAdmin && userType !== "twelfth_student" && (
                 <Link href="/resume" className="transition hover:text-white">
                   Resume Scan
                 </Link>
