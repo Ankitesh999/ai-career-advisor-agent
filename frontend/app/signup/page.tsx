@@ -23,6 +23,7 @@ export default function SignupPage() {
       const me = await getMe();
       setAuthRole(me.role);
       router.push("/dashboard");
+      window.location.reload();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Signup failed.");
     } finally {

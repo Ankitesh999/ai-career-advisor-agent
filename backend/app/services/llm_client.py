@@ -208,3 +208,105 @@ class LLMClient:
             if match:
                 return json.loads(match.group(0))
             raise ValueError("LLM returned invalid JSON.")
+
+    def generate_branch_analysis(self, profile: StudentProfile) -> dict:
+        client = self._require_client()
+
+        subjects_str = (
+            ", ".join(profile.subjects) if profile.subjects else "Not specified"
+        )
+
+        system_prompt = (
+            "You are an expert career advisor for 12th-grade students choosing engineering branches. "
+            "Analyze the student's profile and compare two engineering branches: "
+            "1. Artificial Intelligence & Machine Learning (AIML) "
+            "2. Cyber Security "
+            "Return ONLY valid JSON that matches the required schema."
+        )
+
+        user_prompt = (
+            "Analyze the following student profile for branch compatibility between AIML and Cyber Security.\n"
+            f"Name: {profile.name}\n"
+            f"12th Percentage: {profile.twelfth_percentage}%\n"
+            f"Subjects Studied: {subjects_str}\n"
+            f"Math Strength: {profile.math_strength or 'Not specified'}\n"
+            f"Logical Reasoning: {profile.logical_reasoning or 'Not specified'}\n"
+            f"Programming Interest: {profile.programming_interest or 'Not specified'}\n"
+            f"Interests: {', '.join(profile.interests)}\n"
+            f"Current Skills: {', '.join(profile.current_skills)}\n"
+            f"Degree: {profile.degree}\n"
+            f"Specialization: {profile.specialization}\n"
+            "\n"
+            "Required JSON format:\n"
+            "{\n"
+            '  "aiml_score": 86,\n'
+            '  "cyber_security_score": 74,\n'
+            '  "recommended_branch": "AIML",\n'
+            '  "branch_reasoning": [{"reason": "Strong mathematics foundation"}, {"reason": "High interest in AI/ML"}],\n'
+            '  "aiml_roles": [{"role": "Machine Learning Engineer", "score": 90}, {"role": "Data Scientist", "score": 85}],\n'
+            '  "cyber_roles": [{"role": "Security Analyst", "score": 70}, {"role": "Penetration Tester", "score": 65}],\n'
+            '  "aiml_skills": ["Python", "Linear Algebra", "Machine Learning", "Deep Learning", "Data Analysis"],\n'
+            '  "cyber_skills": ["Computer Networking", "Linux", "Cryptography", "Ethical Hacking", "Security Tools"],\n'
+            '  "aiml_roadmap": [{"year": 1, "topics": ["Python Programming", "Mathematics Fundamentals", "Data Structures"]}],\n'
+            '  "cyber_roadmap": [{"year": 1, "topics": ["Networking Fundamentals", "Linux Basics", "Programming Basics"]}],\n'
+            '  "industry_insights": [{"branch": "AIML", "insight": "Rapid growth due to AI adoption"}, {"branch": "Cyber Security", "insight": "Global shortage of cybersecurity professionals"}]\n'
+            "}\n"
+        )
+
+        response = client.models.generate_content(
+            model=self.model,
+            contents=user_prompt,
+            config=types.GenerateContentConfig(
+                system_instruction=system_prompt,
+                response_mime_type="application/json",
+                temperature=0.7,
+                max_output_tokens=800,
+            ),
+        )
+
+        output_text = getattr(response, "text", None)
+        if not output_text:
+            raise ValueError("LLM returned empty output.")
+
+        data = self._parse_json(output_text)
+
+        required_keys = {
+            "aiml_score",
+            "cyber_security_score",
+            "recommended_branch",
+            "branch_reasoning",
+            "aiml_roles",
+            "cyber_roles",
+            "aiml_skills",
+            "cyber_skills",
+            "aiml_roadmap",
+            "cyber_roadmap",
+            "industry_insights",
+        }
+        if not required_keys.issubset(data.keys()):
+            raise ValueError("LLM JSON missing required keys.")
+
+        if not isinstance(data["aiml_score"], int):
+            raise ValueError("Invalid aiml_score format.")
+        if not isinstance(data["cyber_security_score"], int):
+            raise ValueError("Invalid cyber_security_score format.")
+        if not isinstance(data["recommended_branch"], str):
+            raise ValueError("Invalid recommended_branch format.")
+        if not isinstance(data["branch_reasoning"], list):
+            raise ValueError("Invalid branch_reasoning format.")
+        if not isinstance(data["aiml_roles"], list):
+            raise ValueError("Invalid aiml_roles format.")
+        if not isinstance(data["cyber_roles"], list):
+            raise ValueError("Invalid cyber_roles format.")
+        if not isinstance(data["aiml_skills"], list):
+            raise ValueError("Invalid aiml_skills format.")
+        if not isinstance(data["cyber_skills"], list):
+            raise ValueError("Invalid cyber_skills format.")
+        if not isinstance(data["aiml_roadmap"], list):
+            raise ValueError("Invalid aiml_roadmap format.")
+        if not isinstance(data["cyber_roadmap"], list):
+            raise ValueError("Invalid cyber_roadmap format.")
+        if not isinstance(data["industry_insights"], list):
+            raise ValueError("Invalid industry_insights format.")
+
+        return data

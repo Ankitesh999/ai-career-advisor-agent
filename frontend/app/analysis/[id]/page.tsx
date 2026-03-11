@@ -3,6 +3,7 @@
 import { use, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 
+import BranchIntelligencePanel from "@/components/BranchIntelligencePanel";
 import CareerChart from "@/components/CareerChart";
 import CareerChat from "@/components/CareerChat";
 import CompanyFitChart from "@/components/CompanyFitChart";
@@ -17,6 +18,7 @@ import {
   EmployabilityScoreRead,
   PlacementRiskRead,
   RoleGapRead,
+  StudentProfileRead,
   generateCompanyFit,
   computeEmployabilityScore,
   formatINR,
@@ -28,6 +30,7 @@ import {
   getPlacementRisk,
   generateRoleGaps,
   generatePlacementRisk,
+  getProfile,
 } from "@/lib/api";
 
 type AnalysisPageProps = {
@@ -56,6 +59,7 @@ export default function AnalysisPage({ params }: AnalysisPageProps) {
   const { id } = use(params);
   const profileId = Number(id);
   const [analysis, setAnalysis] = useState<CareerAnalysisRead | null>(null);
+  const [profile, setProfile] = useState<StudentProfileRead | null>(null);
   const [companyFit, setCompanyFit] = useState<CompanyFitRead | null>(null);
   const [roleGaps, setRoleGaps] = useState<RoleGapRead | null>(null);
   const [placementRisk, setPlacementRisk] = useState<PlacementRiskRead | null>(null);
@@ -68,6 +72,8 @@ export default function AnalysisPage({ params }: AnalysisPageProps) {
   const [missing, setMissing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const isTwelfth = profile?.user_type === "twelfth_student";
+
   useEffect(() => {
     let mounted = true;
 
@@ -76,31 +82,42 @@ export default function AnalysisPage({ params }: AnalysisPageProps) {
       setError(null);
       setMissing(false);
       try {
+        const profileData = await getProfile(profileId);
+        if (mounted) {
+          setProfile(profileData);
+        }
+
         const data = await getAnalysis(profileId);
         if (mounted) {
           setAnalysis(data);
         }
-        try {
-          const score = await getEmployabilityScore(profileId);
-          if (mounted) setEmployability(score);
-        } catch {
-          const score = await computeEmployabilityScore(profileId);
-          if (mounted) setEmployability(score);
+
+        const userIsTwelfth = profileData.user_type === "twelfth_student";
+
+        if (!userIsTwelfth) {
+          try {
+            const score = await getEmployabilityScore(profileId);
+            if (mounted) setEmployability(score);
+          } catch {
+            const score = await computeEmployabilityScore(profileId);
+            if (mounted) setEmployability(score);
+          }
+          try {
+            const fit = await getCompanyFit(profileId);
+            if (mounted) setCompanyFit(fit);
+          } catch {
+            const fit = await generateCompanyFit(profileId);
+            if (mounted) setCompanyFit(fit);
+          }
+          try {
+            const gaps = await getRoleGaps(profileId);
+            if (mounted) setRoleGaps(gaps);
+          } catch {
+            const gaps = await generateRoleGaps(profileId);
+            if (mounted) setRoleGaps(gaps);
+          }
         }
-        try {
-          const fit = await getCompanyFit(profileId);
-          if (mounted) setCompanyFit(fit);
-        } catch {
-          const fit = await generateCompanyFit(profileId);
-          if (mounted) setCompanyFit(fit);
-        }
-        try {
-          const gaps = await getRoleGaps(profileId);
-          if (mounted) setRoleGaps(gaps);
-        } catch {
-          const gaps = await generateRoleGaps(profileId);
-          if (mounted) setRoleGaps(gaps);
-        }
+
         try {
           const risk = await getPlacementRisk(profileId);
           if (mounted) setPlacementRisk(risk);
@@ -254,83 +271,87 @@ export default function AnalysisPage({ params }: AnalysisPageProps) {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <div className="space-y-6">
-              <CareerChart data={analysis.career_recommendations} />
-              {companyFit ? <CompanyFitChart data={companyFit.matches} /> : null}
-              {employability ? (
-                <div className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-lg backdrop-blur">
-                  <p className="text-xs uppercase tracking-[0.2em] text-slate-400">
-                    Employability Score
-                  </p>
-                  <div className="mt-3 flex items-end justify-between">
-                    <p className="text-4xl font-semibold text-white">
-                      {employability.overall_score}
+          {isTwelfth && <BranchIntelligencePanel analysis={analysis} />}
+
+          {isTwelfth || (
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+              <div className="space-y-6">
+                <CareerChart data={analysis.career_recommendations} />
+                {companyFit ? <CompanyFitChart data={companyFit.matches} /> : null}
+                {employability ? (
+                  <div className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-lg backdrop-blur">
+                    <p className="text-xs uppercase tracking-[0.2em] text-slate-400">
+                      Employability Score
                     </p>
-                    <p className="text-sm text-slate-400">out of 100</p>
+                    <div className="mt-3 flex items-end justify-between">
+                      <p className="text-4xl font-semibold text-white">
+                        {employability.overall_score}
+                      </p>
+                      <p className="text-sm text-slate-400">out of 100</p>
+                    </div>
                   </div>
-                </div>
-              ) : null}
-              <SkillGapList items={analysis.skill_gaps} />
-              <LearningRoadmap stages={analysis.learning_roadmap} />
-              {roleGaps ? <RoleGapPanel items={roleGaps.role_gaps} /> : null}
+                ) : null}
+                <SkillGapList items={analysis.skill_gaps} />
+                <LearningRoadmap stages={analysis.learning_roadmap} />
+                {roleGaps ? <RoleGapPanel items={roleGaps.role_gaps} /> : null}
+              </div>
+
+              <div className="space-y-6">
+                <CareerChat profileId={profileId} />
+                {employability ? (
+                  <EmployabilityChart
+                    scores={{
+                      academic_strength: employability.academic_strength,
+                      technical_skills: employability.technical_skills,
+                      industry_readiness: employability.industry_readiness,
+                      resume_quality: employability.resume_quality,
+                    }}
+                  />
+                ) : null}
+                {placementRisk ? (
+                  <PlacementRiskCard
+                    level={placementRisk.risk_level}
+                    reasons={placementRisk.reasons}
+                  />
+                ) : null}
+
+                <motion.div
+                  whileHover={{ y: -4 }}
+                  className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-lg backdrop-blur"
+                >
+                  <h3 className="text-sm font-semibold text-slate-300">
+                    Estimated Entry-Level Salary
+                  </h3>
+                  <p className="mt-3 text-3xl font-bold text-white">
+                    {formatSalaryRange(analysis)}
+                  </p>
+                  <p className="mt-2 text-sm text-slate-400">Entry Level AI Roles</p>
+                </motion.div>
+
+                <motion.div
+                  whileHover={{ y: -4 }}
+                  className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-lg backdrop-blur"
+                >
+                  <h3 className="mb-3 text-sm font-semibold text-slate-200">
+                    Industry Trends
+                  </h3>
+                  <ul className="space-y-2 text-sm text-slate-300">
+                    {analysis.industry_trends.map((trend) => (
+                      <li
+                        key={`${trend.trend}-${trend.impact}`}
+                        className="flex items-center justify-between"
+                      >
+                        <span>{trend.trend}</span>
+                        <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs font-semibold text-slate-200">
+                          {trend.impact.toUpperCase()}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </motion.div>
+              </div>
             </div>
-
-            <div className="space-y-6">
-              <CareerChat profileId={profileId} />
-              {employability ? (
-                <EmployabilityChart
-                  scores={{
-                    academic_strength: employability.academic_strength,
-                    technical_skills: employability.technical_skills,
-                    industry_readiness: employability.industry_readiness,
-                    resume_quality: employability.resume_quality,
-                  }}
-                />
-              ) : null}
-              {placementRisk ? (
-                <PlacementRiskCard
-                  level={placementRisk.risk_level}
-                  reasons={placementRisk.reasons}
-                />
-              ) : null}
-
-              <motion.div
-                whileHover={{ y: -4 }}
-                className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-lg backdrop-blur"
-              >
-                <h3 className="text-sm font-semibold text-slate-300">
-                  Estimated Entry-Level Salary
-                </h3>
-                <p className="mt-3 text-3xl font-bold text-white">
-                  {formatSalaryRange(analysis)}
-                </p>
-                <p className="mt-2 text-sm text-slate-400">Entry Level AI Roles</p>
-              </motion.div>
-
-              <motion.div
-                whileHover={{ y: -4 }}
-                className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-lg backdrop-blur"
-              >
-                <h3 className="mb-3 text-sm font-semibold text-slate-200">
-                  Industry Trends
-                </h3>
-                <ul className="space-y-2 text-sm text-slate-300">
-                  {analysis.industry_trends.map((trend) => (
-                    <li
-                      key={`${trend.trend}-${trend.impact}`}
-                      className="flex items-center justify-between"
-                    >
-                      <span>{trend.trend}</span>
-                      <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs font-semibold text-slate-200">
-                        {trend.impact.toUpperCase()}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </motion.div>
-            </div>
-          </div>
+          )}
         </motion.div>
       ) : null}
     </main>

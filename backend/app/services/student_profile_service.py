@@ -11,7 +11,9 @@ class StudentProfileService:
     def __init__(self, db: Session) -> None:
         self.db = db
 
-    def create_profile(self, payload: StudentProfileCreate, user_id: int) -> StudentProfile:
+    def create_profile(
+        self, payload: StudentProfileCreate, user_id: int
+    ) -> StudentProfile:
         profile = StudentProfile(
             user_id=user_id,
             name=payload.name,
@@ -25,6 +27,11 @@ class StudentProfileService:
             projects=payload.projects,
             internships=payload.internships,
             certifications=payload.certifications,
+            subjects=payload.subjects,
+            math_strength=payload.math_strength,
+            logical_reasoning=payload.logical_reasoning,
+            programming_interest=payload.programming_interest,
+            user_type=payload.user_type or "college_student",
         )
         self.db.add(profile)
         self.db.commit()
@@ -38,8 +45,10 @@ class StudentProfileService:
         return self.db.scalar(stmt)
 
     def list_profiles(self, user_id: int) -> list[StudentProfile]:
-        stmt = select(StudentProfile).where(StudentProfile.user_id == user_id).order_by(
-            StudentProfile.id
+        stmt = (
+            select(StudentProfile)
+            .where(StudentProfile.user_id == user_id)
+            .order_by(StudentProfile.id)
         )
         return list(self.db.scalars(stmt))
 
@@ -61,6 +70,12 @@ class StudentProfileService:
         profile.projects = payload.projects
         profile.internships = payload.internships
         profile.certifications = payload.certifications
+        profile.subjects = payload.subjects
+        profile.math_strength = payload.math_strength
+        profile.logical_reasoning = payload.logical_reasoning
+        profile.programming_interest = payload.programming_interest
+        if payload.user_type:
+            profile.user_type = payload.user_type
 
         self.db.commit()
         self.db.refresh(profile)

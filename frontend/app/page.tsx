@@ -63,14 +63,14 @@ export default function HomePage() {
         >
           <div className="space-y-6">
             <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-slate-200">
-              AI Career & Placement Intelligence
+              SAGE – AI Career Intelligence
             </div>
             <h1 className="text-5xl font-bold tracking-tight text-white sm:text-6xl">
-              AI Career & Placement Intelligence Agent
+              Choose Your Path
             </h1>
             <p className="text-lg text-slate-300">
-              A full-stack placement intelligence suite: career analysis, employability
-              scoring, resume scanning, company fit, and training recommendations.
+              AI-powered career guidance: Choose between AIML and Cyber Security, or plan
+              your college career path with intelligent recommendations.
             </p>
             <div className="flex flex-wrap items-center gap-4">
               {savedProfileId ? (
@@ -102,12 +102,67 @@ export default function HomePage() {
                 </>
               ) : (
                 <>
-                  <Link
-                    href="/create-profile"
-                    className="rounded-full bg-white px-6 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-200"
-                  >
-                    Create Profile
-                  </Link>
+                  <div className="grid w-full gap-4 md:grid-cols-2">
+                    <Link
+                      href="/create-profile?type=twelfth"
+                      className="group flex flex-col items-center justify-center rounded-2xl border border-indigo-500/30 bg-indigo-500/5 p-6 text-center shadow-lg backdrop-blur transition hover:border-indigo-500/50 hover:bg-indigo-500/10"
+                    >
+                      <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-indigo-500/20 text-indigo-400">
+                        <svg
+                          className="h-6 w-6"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+                          />
+                        </svg>
+                      </div>
+                      <h3 className="text-lg font-semibold text-white group-hover:text-indigo-300">
+                        What should you choose?
+                      </h3>
+                      <p className="mt-2 text-sm text-slate-400">
+                        For 12th grade students deciding between AIML and Cyber Security
+                      </p>
+                      <span className="mt-4 rounded-full bg-indigo-500 px-4 py-2 text-sm font-semibold text-white transition group-hover:bg-indigo-400">
+                        Start Branch Analysis
+                      </span>
+                    </Link>
+
+                    <Link
+                      href="/create-profile?type=college"
+                      className="group flex flex-col items-center justify-center rounded-2xl border border-cyan-500/30 bg-cyan-500/5 p-6 text-center shadow-lg backdrop-blur transition hover:border-cyan-500/50 hover:bg-cyan-500/10"
+                    >
+                      <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-cyan-500/20 text-cyan-400">
+                        <svg
+                          className="h-6 w-6"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
+                          />
+                        </svg>
+                      </div>
+                      <h3 className="text-lg font-semibold text-white group-hover:text-cyan-300">
+                        Where do you want to go?
+                      </h3>
+                      <p className="mt-2 text-sm text-slate-400">
+                        For college students planning future careers
+                      </p>
+                      <span className="mt-4 rounded-full bg-cyan-500 px-4 py-2 text-sm font-semibold text-white transition group-hover:bg-cyan-400">
+                        Start Career Analysis
+                      </span>
+                    </Link>
+                  </div>
                   {isAdmin ? (
                     <Link
                       href="/admin/dashboard"
@@ -116,12 +171,6 @@ export default function HomePage() {
                       Placement Cell Dashboard
                     </Link>
                   ) : null}
-                  <Link
-                    href="/analysis/1"
-                    className="rounded-full border border-white/20 px-6 py-3 text-sm font-semibold text-white transition hover:border-white/40"
-                  >
-                    View Example Dashboard
-                  </Link>
                 </>
               )}
             </div>

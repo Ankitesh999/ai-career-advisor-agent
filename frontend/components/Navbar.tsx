@@ -26,6 +26,7 @@ export default function Navbar() {
     clearAuthRole();
     clearStoredProfileId();
     router.push("/login");
+    window.location.reload();
   };
 
   return (

@@ -1,12 +1,18 @@
 "use client";
 
+
 import ProfileForm from "@/components/ProfileForm";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getStoredProfileId } from "@/lib/profile";
+import { useSearchParams } from "next/navigation";
 
 export default function CreateProfilePage() {
   const [savedProfileId, setSavedProfileId] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+  const type = searchParams?.get("type");
+  let formType: "twelfth" | "college" = "college";
+  if (type === "twelfth") formType = "twelfth";
 
   useEffect(() => {
     const stored = getStoredProfileId();
@@ -45,7 +51,7 @@ export default function CreateProfilePage() {
         </div>
       ) : null}
       <div className="mt-6">
-        <ProfileForm />
+        <ProfileForm formType={formType} />
       </div>
     </main>
   );

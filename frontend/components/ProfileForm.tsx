@@ -11,6 +11,7 @@ type ProfileFormProps = {
   initialValues?: Partial<StudentProfileCreate>;
   onSubmitOverride?: (payload: StudentProfileCreate) => Promise<StudentProfileRead>;
   submitLabel?: string;
+  formType?: "twelfth" | "college";
 };
 
 const parseCommaList = (value: string): string[] =>
@@ -24,6 +25,7 @@ export default function ProfileForm({
   initialValues,
   onSubmitOverride,
   submitLabel,
+  formType = "college",
 }: ProfileFormProps) {
   const router = useRouter();
   const [form, setForm] = useState({
@@ -101,6 +103,7 @@ export default function ProfileForm({
       className="space-y-6 rounded-2xl border border-white/10 bg-white/5 p-6 shadow-lg backdrop-blur"
     >
       <div className="grid gap-4 md:grid-cols-2">
+        {/* Name is always required */}
         <label className="flex flex-col gap-2 text-sm font-medium text-slate-200">
           Name
           <input
@@ -110,60 +113,73 @@ export default function ProfileForm({
             required
           />
         </label>
-        <label className="flex flex-col gap-2 text-sm font-medium text-slate-200">
-          12th Percentage
-          <input
-            type="number"
-            step="0.1"
-            className="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-400/50"
-            value={form.twelfth_percentage}
-            onChange={(event) =>
-              setForm({ ...form, twelfth_percentage: event.target.value })
-            }
-            required
-          />
-        </label>
-        <label className="flex flex-col gap-2 text-sm font-medium text-slate-200">
-          CGPA
-          <input
-            type="number"
-            step="0.1"
-            className="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-400/50"
-            value={form.cgpa}
-            onChange={(event) => setForm({ ...form, cgpa: event.target.value })}
-            required
-          />
-        </label>
-        <label className="flex flex-col gap-2 text-sm font-medium text-slate-200">
-          Degree
-          <input
-            className="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-400/50"
-            value={form.degree}
-            onChange={(event) => setForm({ ...form, degree: event.target.value })}
-            required
-          />
-        </label>
-        <label className="flex flex-col gap-2 text-sm font-medium text-slate-200">
-          Specialization
-          <input
-            className="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-400/50"
-            value={form.specialization}
-            onChange={(event) => setForm({ ...form, specialization: event.target.value })}
-            required
-          />
-        </label>
+        {/* 12th Percentage for twelfth, CGPA for college */}
+        {formType === "twelfth" ? (
+          <label className="flex flex-col gap-2 text-sm font-medium text-slate-200">
+            12th Percentage
+            <input
+              type="number"
+              step="0.1"
+              className="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-400/50"
+              value={form.twelfth_percentage}
+              onChange={(event) =>
+                setForm({ ...form, twelfth_percentage: event.target.value })
+              }
+              required
+            />
+          </label>
+        ) : (
+          <label className="flex flex-col gap-2 text-sm font-medium text-slate-200">
+            CGPA
+            <input
+              type="number"
+              step="0.1"
+              className="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-400/50"
+              value={form.cgpa}
+              onChange={(event) => setForm({ ...form, cgpa: event.target.value })}
+              required
+            />
+          </label>
+        )}
+        {/* Degree and Specialization for college only */}
+        {formType === "college" && (
+          <>
+            <label className="flex flex-col gap-2 text-sm font-medium text-slate-200">
+              Degree
+              <input
+                className="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-400/50"
+                value={form.degree}
+                onChange={(event) => setForm({ ...form, degree: event.target.value })}
+                required
+              />
+            </label>
+            <label className="flex flex-col gap-2 text-sm font-medium text-slate-200">
+              Specialization
+              <input
+                className="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-400/50"
+                value={form.specialization}
+                onChange={(event) => setForm({ ...form, specialization: event.target.value })}
+                required
+              />
+            </label>
+          </>
+        )}
       </div>
 
-      <label className="flex flex-col gap-2 text-sm font-medium text-slate-200">
-        Current Skills (comma-separated)
-        <input
-          className="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-400/50"
-          value={form.current_skills}
-          onChange={(event) => setForm({ ...form, current_skills: event.target.value })}
-          placeholder="Python, SQL, TensorFlow"
-        />
-      </label>
+      {/* Skills for college only */}
+      {formType === "college" && (
+        <label className="flex flex-col gap-2 text-sm font-medium text-slate-200">
+          Current Skills (comma-separated)
+          <input
+            className="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-400/50"
+            value={form.current_skills}
+            onChange={(event) => setForm({ ...form, current_skills: event.target.value })}
+            placeholder="Python, SQL, TensorFlow"
+          />
+        </label>
+      )}
 
+      {/* Interests for both */}
       <label className="flex flex-col gap-2 text-sm font-medium text-slate-200">
         Interests (comma-separated)
         <input
@@ -174,50 +190,19 @@ export default function ProfileForm({
         />
       </label>
 
+      {/* Target Industry for both, optional for twelfth */}
       <label className="flex flex-col gap-2 text-sm font-medium text-slate-200">
-        Target Industry
+        Target Industry {formType === "twelfth" && <span className="text-xs text-slate-400">(optional)</span>}
         <input
           className="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-400/50"
           value={form.target_industry}
           onChange={(event) => setForm({ ...form, target_industry: event.target.value })}
-          required
+          // required for college, optional for twelfth
+          required={formType === "college"}
         />
       </label>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <label className="flex flex-col gap-2 text-sm font-medium text-slate-200">
-          Projects
-          <input
-            type="number"
-            className="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-400/50"
-            value={form.projects}
-            onChange={(event) => setForm({ ...form, projects: event.target.value })}
-            required
-          />
-        </label>
-        <label className="flex flex-col gap-2 text-sm font-medium text-slate-200">
-          Internships
-          <input
-            type="number"
-            className="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-400/50"
-            value={form.internships}
-            onChange={(event) => setForm({ ...form, internships: event.target.value })}
-            required
-          />
-        </label>
-        <label className="flex flex-col gap-2 text-sm font-medium text-slate-200">
-          Certifications
-          <input
-            type="number"
-            className="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-400/50"
-            value={form.certifications}
-            onChange={(event) =>
-              setForm({ ...form, certifications: event.target.value })
-            }
-            required
-          />
-        </label>
-      </div>
+      {/* Projects, Internships, Certifications for college only (hidden for both as per requirements) */}
 
       <button
         type="submit"

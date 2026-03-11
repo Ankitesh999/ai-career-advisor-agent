@@ -15,6 +15,11 @@ class StudentProfileCreate(BaseModel):
     projects: int = 0
     internships: int = 0
     certifications: int = 0
+    subjects: list[str] | None = None
+    math_strength: str | None = None
+    logical_reasoning: str | None = None
+    programming_interest: str | None = None
+    user_type: str | None = None
 
 
 class StudentProfileRead(BaseModel):
@@ -33,4 +38,9 @@ class StudentProfileRead(BaseModel):
     projects: int
     internships: int
     certifications: int
+    subjects: list[str] | None = None
+    math_strength: str | None = None
+    logical_reasoning: str | None = None
+    programming_interest: str | None = None
+    user_type: str | None = None
     created_at: datetime

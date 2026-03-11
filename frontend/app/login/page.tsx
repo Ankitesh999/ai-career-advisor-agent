@@ -31,10 +31,12 @@ export default function LoginPage() {
           return;
         }
         router.push("/admin/dashboard");
+        window.location.reload();
         return;
       }
 
       router.push("/dashboard");
+      window.location.reload();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed.");
     } finally {

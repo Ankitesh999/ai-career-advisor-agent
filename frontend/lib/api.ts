@@ -45,6 +45,11 @@ export interface StudentProfileCreate {
   projects: number;
   internships: number;
   certifications: number;
+  subjects?: string[];
+  math_strength?: string;
+  logical_reasoning?: string;
+  programming_interest?: string;
+  user_type?: string;
 }
 
 export interface StudentProfileRead extends StudentProfileCreate {
@@ -75,6 +80,17 @@ export interface CareerAnalysisRead {
   learning_roadmap: { stage: string; topics: string[] }[];
   salary_insights: { currency: string; estimate_min: number; estimate_max: number };
   industry_trends: { trend: string; impact: string }[];
+  aiml_score?: number;
+  cyber_security_score?: number;
+  recommended_branch?: string;
+  branch_reasoning?: { reason: string }[];
+  aiml_roles?: { role: string; score: number }[];
+  cyber_roles?: { role: string; score: number }[];
+  aiml_skills?: string[];
+  cyber_skills?: string[];
+  aiml_roadmap?: { year: number; topics: string[] }[];
+  cyber_roadmap?: { year: number; topics: string[] }[];
+  industry_insights?: { branch: string; insight: string }[];
   created_at: string;
 }
 
@@ -231,6 +247,12 @@ export function listProfiles(): Promise<StudentProfileRead[]> {
 
 export function generateAnalysis(profileId: number): Promise<CareerAnalysisRead> {
   return request<CareerAnalysisRead>(`/api/v1/analysis/${profileId}`, {
+    method: "POST",
+  });
+}
+
+export function generateBranchAnalysis(profileId: number): Promise<CareerAnalysisRead> {
+  return request<CareerAnalysisRead>(`/api/v1/branch-analysis/${profileId}`, {
     method: "POST",
   });
 }
