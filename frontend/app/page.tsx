@@ -43,6 +43,7 @@ const features = [
 export default function HomePage() {
   const [savedProfileId, setSavedProfileId] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isAuthed, setIsAuthed] = useState(false);
 
   useEffect(() => {
     const stored = getStoredProfileId();
@@ -50,6 +51,7 @@ export default function HomePage() {
       setSavedProfileId(stored);
     }
     setIsAdmin(getAuthRole() === "admin");
+    setIsAuthed(Boolean(localStorage.getItem("auth_token")));
   }, []);
 
   return (
@@ -241,6 +243,7 @@ export default function HomePage() {
         </div>
       </section>
 
+      {!isAuthed && (
       <section className="mx-auto max-w-5xl px-6 pb-20 text-center">
         <div className="rounded-2xl border border-white/10 bg-white/5 p-10 shadow-lg backdrop-blur">
           <h2 className="text-2xl font-semibold text-white">
@@ -259,6 +262,7 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+      )}
     </div>
   );
 }
