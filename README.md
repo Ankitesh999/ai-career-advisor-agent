@@ -82,6 +82,13 @@ uv run uvicorn main:app --reload
 
 API docs: http://127.0.0.1:8000/docs
 
+### 4) Apply one-time user type patch (existing DBs)
+
+```bash
+cd backend
+psql "postgresql://USER:PASSWORD@HOST:PORT/DB" -f sql/2026-03-15_add_user_student_type.sql
+```
+
 ---
 
 ## Frontend Setup
@@ -104,120 +111,150 @@ NEXT_PUBLIC_API_BASE_URL=http://127.0.0.1:8000
 
 ## Database Tables (Manual SQL)
 
-If you are not using migrations yet, create these tables (in addition to `users`, `student_profiles`, and `career_analyses`):
+If you are not using migrations yet, run this SQL:
 
--- ===========================================
--- AI Career Intelligence Agent - Full Schema
--- ===========================================
-
--- USERS
+```sql
+-- 1. USERS table
 CREATE TABLE IF NOT EXISTS users (
-  id SERIAL PRIMARY KEY,
-  email VARCHAR(320) UNIQUE NOT NULL,
-  password_hash VARCHAR(255) NOT NULL,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    id SERIAL PRIMARY KEY,
+    email VARCHAR(320) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    student_type VARCHAR(20) NOT NULL DEFAULT 'college_student',
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    CONSTRAINT users_student_type_check
+      CHECK (student_type IN ('twelfth_student', 'college_student'))
 );
 
--- STUDENT PROFILES
+CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+
+-- 2. STUDENT_PROFILES table
 CREATE TABLE IF NOT EXISTS student_profiles (
-  id SERIAL PRIMARY KEY,
-  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  name VARCHAR(200) NOT NULL,
-  twelfth_percentage FLOAT NOT NULL,
-  cgpa FLOAT NOT NULL DEFAULT 0.0,
-  degree VARCHAR(200) NOT NULL,
-  specialization VARCHAR(200) NOT NULL,
-  current_skills JSON NOT NULL DEFAULT '[]',
-  interests JSON NOT NULL DEFAULT '[]',
-  target_industry VARCHAR(200) NOT NULL,
-  projects INTEGER NOT NULL DEFAULT 0,
-  internships INTEGER NOT NULL DEFAULT 0,
-  certifications INTEGER NOT NULL DEFAULT 0,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    name VARCHAR(200) NOT NULL,
+    twelfth_percentage DOUBLE PRECISION NOT NULL,
+    cgpa DOUBLE PRECISION NOT NULL DEFAULT 0.0,
+    degree VARCHAR(200) NOT NULL,
+    specialization VARCHAR(200) NOT NULL,
+    current_skills JSONB NOT NULL DEFAULT '[]',
+    interests JSONB NOT NULL DEFAULT '[]',
+    target_industry VARCHAR(200) NOT NULL,
+    projects INTEGER NOT NULL DEFAULT 0,
+    internships INTEGER NOT NULL DEFAULT 0,
+    certifications INTEGER NOT NULL DEFAULT 0,
+    subjects JSONB DEFAULT '[]',
+    math_strength VARCHAR(20),
+    logical_reasoning VARCHAR(20),
+    programming_interest VARCHAR(20),
+    user_type VARCHAR(20),
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    CONSTRAINT student_profiles_user_type_check
+      CHECK (user_type IS NULL OR user_type IN ('twelfth_student', 'college_student'))
 );
-CREATE INDEX IF NOT EXISTS student_profiles_user_id_idx ON student_profiles(user_id);
 
--- CAREER ANALYSES
-CREATE TABLE IF NOT EXISTS career_analyses (
-  id SERIAL PRIMARY KEY,
-  student_profile_id INTEGER NOT NULL REFERENCES student_profiles(id) ON DELETE CASCADE,
-  career_recommendations JSON NOT NULL DEFAULT '[]',
-  skill_gaps JSON NOT NULL DEFAULT '[]',
-  learning_roadmap JSON NOT NULL DEFAULT '[]',
-  salary_insights JSON NOT NULL DEFAULT '{}',
-  industry_trends JSON NOT NULL DEFAULT '[]',
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-CREATE INDEX IF NOT EXISTS career_analyses_profile_id_idx ON career_analyses(student_profile_id);
+CREATE INDEX IF NOT EXISTS idx_student_profiles_user_id ON student_profiles(user_id);
 
--- EMPLOYABILITY SCORES
+-- 3. EMPLOYABILITY_SCORES table
 CREATE TABLE IF NOT EXISTS employability_scores (
-  id SERIAL PRIMARY KEY,
-  student_profile_id INTEGER NOT NULL REFERENCES student_profiles(id) ON DELETE CASCADE,
-  overall_score INTEGER NOT NULL,
-  academic_strength INTEGER NOT NULL,
-  technical_skills INTEGER NOT NULL,
-  industry_readiness INTEGER NOT NULL,
-  resume_quality INTEGER NOT NULL,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    id SERIAL PRIMARY KEY,
+    student_profile_id INTEGER NOT NULL REFERENCES student_profiles(id) ON DELETE CASCADE,
+    overall_score INTEGER NOT NULL,
+    academic_strength INTEGER NOT NULL,
+    technical_skills INTEGER NOT NULL,
+    industry_readiness INTEGER NOT NULL,
+    resume_quality INTEGER NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
-CREATE INDEX IF NOT EXISTS employability_scores_profile_id_idx ON employability_scores(student_profile_id);
 
--- RESUME ANALYSES
-CREATE TABLE IF NOT EXISTS resume_analyses (
-  id SERIAL PRIMARY KEY,
-  student_profile_id INTEGER NOT NULL REFERENCES student_profiles(id) ON DELETE CASCADE,
-  file_name VARCHAR NOT NULL,
-  extracted_skills JSON NOT NULL,
-  projects JSON NOT NULL,
-  experience JSON NOT NULL,
-  education JSON NOT NULL,
-  resume_score INTEGER NOT NULL,
-  missing_keywords JSON NOT NULL,
-  weak_sections JSON NOT NULL,
-  suggestions JSON NOT NULL,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+CREATE INDEX IF NOT EXISTS idx_employability_scores_student_profile_id ON employability_scores(student_profile_id);
+
+-- 4. CAREER_ANALYSES table
+CREATE TABLE IF NOT EXISTS career_analyses (
+    id SERIAL PRIMARY KEY,
+    student_profile_id INTEGER NOT NULL REFERENCES student_profiles(id) ON DELETE CASCADE,
+    career_recommendations JSONB NOT NULL DEFAULT '[]',
+    skill_gaps JSONB NOT NULL DEFAULT '[]',
+    learning_roadmap JSONB NOT NULL DEFAULT '[]',
+    salary_insights JSONB NOT NULL DEFAULT '{}',
+    industry_trends JSONB NOT NULL DEFAULT '[]',
+    aiml_score INTEGER,
+    cyber_security_score INTEGER,
+    recommended_branch VARCHAR(50),
+    branch_reasoning JSONB,
+    aiml_roles JSONB,
+    cyber_roles JSONB,
+    aiml_skills JSONB,
+    cyber_skills JSONB,
+    aiml_roadmap JSONB,
+    cyber_roadmap JSONB,
+    industry_insights JSONB,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
-CREATE INDEX IF NOT EXISTS resume_analyses_profile_id_idx ON resume_analyses(student_profile_id);
 
--- COMPANY FIT
-CREATE TABLE IF NOT EXISTS company_fits (
-  id SERIAL PRIMARY KEY,
-  student_profile_id INTEGER NOT NULL REFERENCES student_profiles(id) ON DELETE CASCADE,
-  matches JSON NOT NULL,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-CREATE INDEX IF NOT EXISTS company_fits_profile_id_idx ON company_fits(student_profile_id);
+CREATE INDEX IF NOT EXISTS idx_career_analyses_student_profile_id ON career_analyses(student_profile_id);
 
--- ROLE GAP ANALYSIS
-CREATE TABLE IF NOT EXISTS role_gap_analyses (
-  id SERIAL PRIMARY KEY,
-  student_profile_id INTEGER NOT NULL REFERENCES student_profiles(id) ON DELETE CASCADE,
-  role_gaps JSON NOT NULL,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-CREATE INDEX IF NOT EXISTS role_gap_analyses_profile_id_idx ON role_gap_analyses(student_profile_id);
-
--- PLACEMENT RISK
-CREATE TABLE IF NOT EXISTS placement_risks (
-  id SERIAL PRIMARY KEY,
-  student_profile_id INTEGER NOT NULL REFERENCES student_profiles(id) ON DELETE CASCADE,
-  risk_level VARCHAR NOT NULL,
-  reasons JSON NOT NULL,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-CREATE INDEX IF NOT EXISTS placement_risks_profile_id_idx ON placement_risks(student_profile_id);
-
--- INTERNSHIP READINESS
+-- 5. INTERNSHIP_READINESS table
 CREATE TABLE IF NOT EXISTS internship_readiness (
-  id SERIAL PRIMARY KEY,
-  student_profile_id INTEGER NOT NULL REFERENCES student_profiles(id) ON DELETE CASCADE,
-  readiness_score INTEGER NOT NULL,
-  readiness_level VARCHAR NOT NULL,
-  action_plan JSON NOT NULL,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    id SERIAL PRIMARY KEY,
+    student_profile_id INTEGER NOT NULL REFERENCES student_profiles(id) ON DELETE CASCADE,
+    readiness_score INTEGER NOT NULL,
+    readiness_level VARCHAR NOT NULL,
+    action_plan JSONB NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
-CREATE INDEX IF NOT EXISTS internship_readiness_profile_id_idx ON internship_readiness(student_profile_id);
+
+CREATE INDEX IF NOT EXISTS idx_internship_readiness_student_profile_id ON internship_readiness(student_profile_id);
+
+-- 6. PLACEMENT_RISKS table
+CREATE TABLE IF NOT EXISTS placement_risks (
+    id SERIAL PRIMARY KEY,
+    student_profile_id INTEGER NOT NULL REFERENCES student_profiles(id) ON DELETE CASCADE,
+    risk_level VARCHAR NOT NULL,
+    reasons JSONB NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_placement_risks_student_profile_id ON placement_risks(student_profile_id);
+
+-- 7. ROLE_GAP_ANALYSES table
+CREATE TABLE IF NOT EXISTS role_gap_analyses (
+    id SERIAL PRIMARY KEY,
+    student_profile_id INTEGER NOT NULL REFERENCES student_profiles(id) ON DELETE CASCADE,
+    role_gaps JSONB NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_role_gap_analyses_student_profile_id ON role_gap_analyses(student_profile_id);
+
+-- 8. COMPANY_FITS table
+CREATE TABLE IF NOT EXISTS company_fits (
+    id SERIAL PRIMARY KEY,
+    student_profile_id INTEGER NOT NULL REFERENCES student_profiles(id) ON DELETE CASCADE,
+    matches JSONB NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_company_fits_student_profile_id ON company_fits(student_profile_id);
+
+-- 9. RESUME_ANALYSES table
+CREATE TABLE IF NOT EXISTS resume_analyses (
+    id SERIAL PRIMARY KEY,
+    student_profile_id INTEGER NOT NULL REFERENCES student_profiles(id) ON DELETE CASCADE,
+    file_name VARCHAR NOT NULL,
+    extracted_skills JSONB NOT NULL,
+    projects JSONB NOT NULL,
+    experience JSONB NOT NULL,
+    education JSONB NOT NULL,
+    resume_score INTEGER NOT NULL,
+    missing_keywords JSONB NOT NULL,
+    weak_sections JSONB NOT NULL,
+    suggestions JSONB NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_resume_analyses_student_profile_id ON resume_analyses(student_profile_id);
+```
+
 
 
 ## Auth & Roles
@@ -231,9 +268,9 @@ CREATE INDEX IF NOT EXISTS internship_readiness_profile_id_idx ON internship_rea
 ## Main Endpoints
 
 ### Auth
-- `POST /api/v1/auth/register`
+- `POST /api/v1/auth/register` (supports `student_type`: `twelfth_student` | `college_student`; defaults to `college_student`)
 - `POST /api/v1/auth/login`
-- `GET /api/v1/auth/me`
+- `GET /api/v1/auth/me` (returns `email`, `role`, `student_type`)
 
 ### Profiles
 - `POST /api/v1/profiles`

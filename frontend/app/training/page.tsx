@@ -7,6 +7,7 @@ import AuthGate from "@/components/AuthGate";
 import {
   TrainingRecommendationsRead,
   IndustryDemandRead,
+  getAuthRole,
   getIndustryDemand,
   getTrainingRecommendations,
 } from "@/lib/api";
@@ -16,6 +17,7 @@ export default function TrainingPage() {
   const [demand, setDemand] = useState<IndustryDemandRead | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -40,6 +42,7 @@ export default function TrainingPage() {
       }
     }
     void load();
+    setIsAdmin(getAuthRole() === "admin");
     return () => {
       mounted = false;
     };
@@ -71,15 +74,17 @@ export default function TrainingPage() {
 
         {data ? (
           <>
-            <div className="grid gap-4 md:grid-cols-3">
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-5 shadow-lg">
-                <p className="text-xs uppercase tracking-[0.2em] text-slate-400">
-                  Students in Cohort
-                </p>
-                <p className="mt-2 text-3xl font-semibold text-white">
-                  {data.total_students}
-                </p>
-              </div>
+            <div className={`grid gap-4 ${isAdmin ? "md:grid-cols-2" : "md:grid-cols-1"}`}>
+              {isAdmin ? (
+                <div className="rounded-2xl border border-white/10 bg-white/5 p-5 shadow-lg">
+                  <p className="text-xs uppercase tracking-[0.2em] text-slate-400">
+                    Students in Cohort
+                  </p>
+                  <p className="mt-2 text-3xl font-semibold text-white">
+                    {data.total_students}
+                  </p>
+                </div>
+              ) : null}
               {demand ? (
                 <div className="rounded-2xl border border-white/10 bg-white/5 p-5 shadow-lg">
                   <p className="text-xs uppercase tracking-[0.2em] text-slate-400">

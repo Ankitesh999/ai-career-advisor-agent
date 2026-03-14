@@ -1,6 +1,7 @@
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "";
 const TOKEN_KEY = "auth_token";
 const ROLE_KEY = "auth_role";
+export type StudentType = "twelfth_student" | "college_student";
 
 type JsonValue =
   | string
@@ -175,6 +176,7 @@ export type AuthResponse = {
 export type MeResponse = {
   email: string;
   role: string;
+  student_type: StudentType;
 };
 
 export function setAuthToken(token: string) {
@@ -202,10 +204,14 @@ export function clearAuthRole() {
   localStorage.removeItem(ROLE_KEY);
 }
 
-export async function registerUser(email: string, password: string): Promise<void> {
+export async function registerUser(
+  email: string,
+  password: string,
+  studentType: StudentType
+): Promise<void> {
   await request("/api/v1/auth/register", {
     method: "POST",
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({ email, password, student_type: studentType }),
   });
 }
 
@@ -371,7 +377,7 @@ export function getResumeAnalysis(profileId: number): Promise<ResumeAnalysisRead
 
 export function formatINR(value: number) {
   const lakhs = value / 100000;
-  return `₹${lakhs.toFixed(1)}L`;
+  return `INR ${lakhs.toFixed(1)}L`;
 }
 
 export type { JsonValue };

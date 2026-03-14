@@ -40,13 +40,13 @@ type AnalysisPageProps = {
 const formatSalaryRange = (analysis: CareerAnalysisRead) => {
   const { currency, estimate_min, estimate_max } = analysis.salary_insights;
   if (currency === "INR") {
-    return `${formatINR(estimate_min)} – ${formatINR(estimate_max)}`;
+    return `${formatINR(estimate_min)} - ${formatINR(estimate_max)}`;
   }
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency,
     maximumFractionDigits: 0,
-  }).format(estimate_min).concat(" – ").concat(
+  }).format(estimate_min).concat(" - ").concat(
     new Intl.NumberFormat("en-US", {
       style: "currency",
       currency,

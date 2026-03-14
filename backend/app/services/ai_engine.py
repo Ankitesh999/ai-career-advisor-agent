@@ -203,28 +203,28 @@ class CareerAIEngine:
         llm_output = self._try_llm(profile)
         if llm_output:
             return llm_output["salary_insights"]
-        base = 60000
+        base = 800000
         specialization = profile.specialization.lower()
         skills = {skill.lower() for skill in profile.current_skills}
 
         if "ai" in specialization or "machine learning" in specialization:
-            base = 90000
+            base = 1200000
         elif "data" in specialization:
-            base = 80000
+            base = 1000000
         elif "software" in specialization:
-            base = 85000
+            base = 1100000
 
         if "python" in skills:
-            base += 3000
+            base += 50000
         if "sql" in skills:
-            base += 2000
+            base += 30000
         if "aws" in skills or "cloud" in skills:
-            base += 4000
+            base += 60000
 
         return {
-            "currency": "USD",
-            "estimate_min": max(base - 10000, 40000),
-            "estimate_max": base + 15000,
+            "currency": "INR",
+            "estimate_min": max(base - 200000, 400000),
+            "estimate_max": base + 250000,
             "note": "Estimates are indicative and vary by region and experience.",
         }
 

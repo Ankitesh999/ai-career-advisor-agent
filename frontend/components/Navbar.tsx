@@ -31,6 +31,7 @@ export default function Navbar() {
     clearAuthToken();
     clearAuthRole();
     clearStoredProfileId();
+    clearStoredUserType();
     router.push("/login");
     window.location.reload();
   };

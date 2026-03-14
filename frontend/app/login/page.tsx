@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { clearAuthRole, clearAuthToken, getMe, loginUser, setAuthRole, setAuthToken } from "@/lib/api";
+import { setStoredUserType } from "@/lib/profile";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -35,6 +36,7 @@ export default function LoginPage() {
         return;
       }
 
+      setStoredUserType(me.student_type || "college_student");
       router.push("/dashboard");
       window.location.reload();
     } catch (err) {

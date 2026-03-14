@@ -3,25 +3,40 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { getMe, loginUser, registerUser, setAuthRole, setAuthToken } from "@/lib/api";
+import {
+  StudentType,
+  getMe,
+  loginUser,
+  registerUser,
+  setAuthRole,
+  setAuthToken,
+} from "@/lib/api";
+import { setStoredUserType } from "@/lib/profile";
 
 export default function SignupPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [studentType, setStudentType] = useState<StudentType | "">("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
+    if (!studentType) {
+      setError("Please select whether you are a 12th or college student.");
+      return;
+    }
+
     try {
       setLoading(true);
-      await registerUser(email, password);
+      await registerUser(email, password, studentType);
       const token = await loginUser(email, password);
       setAuthToken(token.access_token);
       const me = await getMe();
       setAuthRole(me.role);
+      setStoredUserType(me.student_type || studentType);
       router.push("/dashboard");
       window.location.reload();
     } catch (err) {
@@ -61,6 +76,35 @@ export default function SignupPage() {
             required
           />
         </label>
+        <fieldset className="rounded-md border border-white/10 bg-white/5 p-3">
+          <legend className="px-1 text-sm font-medium text-slate-200">
+            Student Type
+          </legend>
+          <div className="mt-2 flex gap-6 text-sm text-slate-200">
+            <label className="flex items-center gap-2">
+              <input
+                type="radio"
+                name="studentType"
+                value="twelfth_student"
+                checked={studentType === "twelfth_student"}
+                onChange={() => setStudentType("twelfth_student")}
+                required
+              />
+              12th Student
+            </label>
+            <label className="flex items-center gap-2">
+              <input
+                type="radio"
+                name="studentType"
+                value="college_student"
+                checked={studentType === "college_student"}
+                onChange={() => setStudentType("college_student")}
+                required
+              />
+              College Student
+            </label>
+          </div>
+        </fieldset>
         <button
           type="submit"
           disabled={loading}

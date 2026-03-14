@@ -4,8 +4,14 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-import { StudentProfileRead, getAnalysis, listProfiles, CareerAnalysisRead } from "@/lib/api";
-import { getStoredProfileId, getStoredUserType, setStoredProfileId, setStoredUserType } from "@/lib/profile";
+import {
+  StudentProfileRead,
+  getAnalysis,
+  listProfiles,
+  CareerAnalysisRead,
+  formatINR,
+} from "@/lib/api";
+import { getStoredUserType, setStoredProfileId, setStoredUserType } from "@/lib/profile";
 import BranchIntelligencePanel from "@/components/BranchIntelligencePanel";
 
 export default function DashboardPage() {
@@ -27,7 +33,9 @@ export default function DashboardPage() {
         if (!mounted) return;
 
         if (profiles.length === 0) {
-          router.push("/create-profile");
+          const storedType = getStoredUserType();
+          const routeType = storedType === "twelfth_student" ? "twelfth" : "college";
+          router.push(`/create-profile?type=${routeType}`);
           return;
         }
 
@@ -40,7 +48,8 @@ export default function DashboardPage() {
         setProfile(latestProfile);
         setStoredProfileId(latestProfile.id);
 
-        const storedUserType = latestProfile.user_type || getStoredUserType();
+        const storedUserType =
+          latestProfile.user_type || getStoredUserType() || "college_student";
         const isTwelfthStudent = storedUserType === "twelfth_student" || (!storedUserType && !latestProfile.degree);
         setIsTwelfth(isTwelfthStudent);
         setStoredUserType(isTwelfthStudent ? "twelfth_student" : "college_student");
@@ -68,14 +77,12 @@ export default function DashboardPage() {
   }, [router]);
 
   const formatSalaryRange = (salary: CareerAnalysisRead["salary_insights"]) => {
-    if (!salary) return "—";
+    if (!salary) return "-";
     const { currency, estimate_min, estimate_max } = salary;
     if (currency === "INR") {
-      const minLakhs = estimate_min / 100000;
-      const maxLakhs = estimate_max / 100000;
-      return `₹${minLakhs.toFixed(1)}L – ₹${maxLakhs.toFixed(1)}L`;
+      return `${formatINR(estimate_min)} - ${formatINR(estimate_max)}`;
     }
-    return `${estimate_min} – ${estimate_max} ${currency}`;
+    return `${estimate_min} - ${estimate_max} ${currency}`;
   };
 
   if (loading) {
@@ -182,7 +189,7 @@ export default function DashboardPage() {
             <div className="space-y-3 rounded-2xl border border-white/10 bg-white/5 p-6 shadow-lg backdrop-blur">
               <p className="text-sm font-semibold text-white">No AI analysis yet.</p>
               <p className="text-sm text-slate-300">
-                Generate branch analysis to see AIML vs Cyber Security recommendations.
+                Generate branch analysis to see your AIML fit and roadmap.
               </p>
               <Link
                 href={`/analysis/${profile.id}`}

@@ -3,20 +3,26 @@
 import ProfileForm from "@/components/ProfileForm";
 import Link from "next/link";
 import { Suspense, useEffect, useState } from "react";
-import { getStoredProfileId } from "@/lib/profile";
+import { getStoredProfileId, getStoredUserType } from "@/lib/profile";
 import { useSearchParams } from "next/navigation";
 
 function CreateProfileContent() {
   const [savedProfileId, setSavedProfileId] = useState<string | null>(null);
+  const [preferredFormType, setPreferredFormType] = useState<"twelfth" | "college">("college");
   const searchParams = useSearchParams();
-  const type = searchParams?.get("type");
-  let formType: "twelfth" | "college" = "college";
-  if (type === "twelfth") formType = "twelfth";
+  const queryType = searchParams?.get("type");
+  let formType: "twelfth" | "college" = preferredFormType;
+  if (queryType === "twelfth") formType = "twelfth";
+  if (queryType === "college") formType = "college";
 
   useEffect(() => {
     const stored = getStoredProfileId();
     if (stored) {
       setSavedProfileId(stored);
+    }
+    const storedUserType = getStoredUserType();
+    if (storedUserType === "twelfth_student") {
+      setPreferredFormType("twelfth");
     }
   }, []);
 

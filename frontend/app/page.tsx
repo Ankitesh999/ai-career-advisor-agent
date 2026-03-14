@@ -4,7 +4,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { Brain, Compass, FileText, Shield, Sparkles, Target } from "lucide-react";
 import { useEffect, useState } from "react";
-import { clearStoredProfileId, getStoredProfileId } from "@/lib/profile";
+import { clearStoredProfileId, getStoredProfileId, getStoredUserType } from "@/lib/profile";
 import { getAuthRole } from "@/lib/api";
 
 const features = [
@@ -44,15 +44,25 @@ export default function HomePage() {
   const [savedProfileId, setSavedProfileId] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isAuthed, setIsAuthed] = useState(false);
+  const [userType, setUserType] = useState<"twelfth_student" | "college_student">(
+    "college_student"
+  );
 
   useEffect(() => {
     const stored = getStoredProfileId();
     if (stored) {
       setSavedProfileId(stored);
     }
+    const storedUserType = getStoredUserType();
+    if (storedUserType === "twelfth_student") {
+      setUserType("twelfth_student");
+    }
     setIsAdmin(getAuthRole() === "admin");
     setIsAuthed(Boolean(localStorage.getItem("auth_token")));
   }, []);
+
+  const isLoggedInStudent = isAuthed && !isAdmin;
+  const isTwelfthUser = userType === "twelfth_student";
 
   return (
     <div className="bg-gradient-to-b from-slate-950 via-slate-950 to-slate-900">
@@ -68,13 +78,34 @@ export default function HomePage() {
               SAGE AI Career Navigator
             </div>
             <h1 className="bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-5xl font-bold tracking-tight text-transparent sm:text-6xl">
-              Choose Your Path
+              {isLoggedInStudent
+                ? isTwelfthUser
+                  ? "Branch Analysis"
+                  : "Career Analysis"
+                : "Choose Your Path"}
             </h1>
             <p className="max-w-[600px] text-lg text-slate-400">
-              An AI agent that helps students understand AIML education, career paths, and the skills needed—from admission to placement.
+              {isLoggedInStudent
+                ? isTwelfthUser
+                  ? "Personalized AIML fit insights for students after 12th."
+                  : "Plan your skills, internships, and placements with AI-powered guidance."
+                : "An AI agent that helps students understand AIML education, career paths, and the skills needed-from admission to placement."}
             </p>
             <div className="flex flex-wrap items-center gap-4">
-              {savedProfileId ? (
+              {isLoggedInStudent ? (
+                <Link
+                  href="/dashboard"
+                  className="rounded-full bg-white px-6 py-3 text-sm font-semibold text-slate-900 shadow-xl transition hover:bg-slate-200 hover:shadow-blue-500/30"
+                >
+                  {savedProfileId
+                    ? isTwelfthUser
+                      ? "Continue Branch Analysis"
+                      : "Continue Career Analysis"
+                    : isTwelfthUser
+                      ? "Start Branch Analysis"
+                      : "Start Career Analysis"}
+                </Link>
+              ) : savedProfileId ? (
                 <>
                   <Link
                     href={`/analysis/${savedProfileId}`}
